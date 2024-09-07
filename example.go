@@ -87,5 +87,13 @@ func main() {
 	defer euicc.Free()
 
 	fmt.Println(euicc.GetEid())
-	fmt.Println(euicc.ProcessNotification(62, false))
+	fmt.Println(euicc.GetEuiccInfo2())
+	ns, err := euicc.GetNotifications()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, n := range ns {
+		fmt.Println(n.SeqNumber, n.ProfileManagementOperation, n.NotificationAddress, n.ICCID)
+	}
 }

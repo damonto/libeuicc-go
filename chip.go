@@ -39,6 +39,7 @@ func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
 	if C.es10c_ex_get_euiccinfo2(e.euiccCtx, &euiccInfo2) == CError {
 		return nil, errors.New("es10c_ex_get_euiccinfo2 failed")
 	}
+	defer C.es10c_ex_euiccinfo2_free(&euiccInfo2)
 	return &EuiccInfo2{
 		SasAccreditationNumber: C.GoString(euiccInfo2.sasAcreditationNumber),
 		ProfileVersion:         C.GoString(euiccInfo2.profileVersion),
@@ -56,6 +57,7 @@ func (e *Libeuicc) GetConfiguredAddresses() (*ConfiguredAddresses, error) {
 	if C.es10a_get_euicc_configured_addresses(e.euiccCtx, &configuredAddresses) == CError {
 		return nil, errors.New("es10a_get_euicc_configured_addresses failed")
 	}
+	defer C.es10a_euicc_configured_addresses_free(&configuredAddresses)
 	return &ConfiguredAddresses{
 		DefaultDPAddress: C.GoString(configuredAddresses.defaultDpAddress),
 		RootDSAddress:    C.GoString(configuredAddresses.rootDsAddress),
