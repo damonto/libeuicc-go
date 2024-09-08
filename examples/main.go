@@ -9,6 +9,7 @@ import (
 func main() {
 	pcscReader, err := libeuicc.NewPCSCReader()
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	euicc, err := libeuicc.NewLibeuicc(pcscReader)
