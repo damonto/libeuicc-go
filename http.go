@@ -7,16 +7,16 @@ package libeuicc
 #include "euicc.h"
 #include "interface.h"
 
-extern int httpTransmit(struct euicc_ctx *ctx, char *url, uint32_t *rcode, uint8_t **rx, uint32_t *rx_len, uint8_t *tx, uint32_t tx_len, char **headers);
+extern int libeuiccHttpTransmit(struct euicc_ctx *ctx, char *url, uint32_t *rcode, uint8_t **rx, uint32_t *rx_len, uint8_t *tx, uint32_t tx_len, char **headers);
 
-static int g_http_transmit(struct euicc_ctx *ctx, const char *url, uint32_t *rcode, uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len, const char **headers) {
-	return httpTransmit(ctx, (char *)url, rcode, rx, rx_len, (uint8_t *)tx, tx_len, (char **)headers);
+static int libeuicc_forward_http_transmit(struct euicc_ctx *ctx, const char *url, uint32_t *rcode, uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len, const char **headers) {
+	return libeuiccHttpTransmit(ctx, (char *)url, rcode, rx, rx_len, (uint8_t *)tx, tx_len, (char **)headers);
 };
 
 static struct euicc_http_interface *init_http_interface() {
 	struct euicc_http_interface *http = (struct euicc_http_interface *)malloc(sizeof(struct euicc_http_interface));
 
-	http->transmit = g_http_transmit;
+	http->transmit = libeuicc_forward_http_transmit;
 
 	return http;
 }
@@ -55,8 +55,8 @@ func initHttp(ctx *C.struct_euicc_ctx) {
 	ctx.http._interface = C.init_http_interface()
 }
 
-//export httpTransmit
-func httpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **C.uint8_t, rx_len *C.uint32_t, tx *C.uint8_t, tx_len C.uint32_t, headers **C.char) C.int {
+//export libeuiccHttpTransmit
+func libeuiccHttpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **C.uint8_t, rx_len *C.uint32_t, tx *C.uint8_t, tx_len C.uint32_t, headers **C.char) C.int {
 	req, err := http.NewRequest("POST", C.GoString(url), bytes.NewBuffer(C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))))
 	if err != nil {
 		return CError
