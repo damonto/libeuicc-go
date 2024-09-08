@@ -16,10 +16,8 @@ type Libeuicc struct {
 }
 
 var (
-	ErrEuiccInitFailed      = errors.New("euicc_init failed")
-	ErrLibeuiccInvalid      = errors.New("libeuicc path is invalid")
-	ErrLibeuiccDoesNotExist = errors.New("libeuicc path does not exist")
-	ErrNotEnoughMemory      = errors.New("not enough memory")
+	ErrEuiccInitFailed = errors.New("euicc_init failed")
+	ErrNotEnoughMemory = errors.New("not enough memory")
 )
 
 func NewLibeuicc(apdu APDU) (*Libeuicc, error) {
