@@ -1,4 +1,4 @@
-package main
+package libeuicc
 
 /*
 #include <stdint.h>

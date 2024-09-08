@@ -1,9 +1,7 @@
-package main
+package libeuicc
 
 /*
-#cgo CFLAGS: -I${SRCDIR}/lpac/euicc -I ${SRCDIR}/lpac/cjson
-#cgo linux,386 LDFLAGS: -L${SRCDIR}/libs/linux-x86_64 -leuicc -lcjson-static
-#cgo linux,amd64 LDFLAGS: -L${SRCDIR}/libs/linux-x86_64 -leuicc -lcjson-static
+#cgo CFLAGS: -I${SRCDIR}/lpac/euicc -I${SRCDIR}/lpac/cjson
 
 #include <stdlib.h>
 
