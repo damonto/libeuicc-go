@@ -59,7 +59,7 @@ func initHttp(ctx *C.struct_euicc_ctx) {
 func httpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **C.uint8_t, rx_len *C.uint32_t, tx *C.uint8_t, tx_len C.uint32_t, headers **C.char) C.int {
 	req, err := http.NewRequest("POST", C.GoString(url), bytes.NewBuffer(C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))))
 	if err != nil {
-		return C.int(-1)
+		return CError
 	}
 	req.Header.Set("Content-Type", "application/json")
 	for _, header := range GoStrings(headers) {
@@ -78,12 +78,12 @@ func httpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return C.int(-1)
+		return CError
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
 	*rx = (*C.uint8_t)(C.CBytes(body))
 	*rx_len = C.uint32_t(len(body))
 	*rcode = C.uint32_t(resp.StatusCode)
-	return C.int(0)
+	return COK
 }

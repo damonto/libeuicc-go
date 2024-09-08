@@ -50,9 +50,9 @@ func initAPDU(ctx *C.struct_euicc_ctx, driver APDU) {
 //export connect
 func connect(ctx *C.struct_euicc_ctx) C.int {
 	if apdu.Connect() != nil {
-		return C.int(-1)
+		return CError
 	}
-	return C.int(0)
+	return COK
 }
 
 //export disconnect
@@ -65,7 +65,7 @@ func openLogicalChannel(ctx *C.struct_euicc_ctx, aid *C.uint8_t, aid_len C.uint8
 	b := C.GoBytes(unsafe.Pointer(aid), C.int(aid_len))
 	channel, err := apdu.OpenLogicalChannel(b)
 	if err != nil {
-		return C.int(-1)
+		return CError
 	}
 	return C.int(channel)
 }
@@ -81,9 +81,9 @@ func apduTransmit(ctx *C.struct_euicc_ctx, rx **C.uint8_t, rx_len *C.uint32_t, t
 	b := C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))
 	r, err := apdu.Transmit(b)
 	if err != nil {
-		return C.int(-1)
+		return CError
 	}
 	*rx = (*C.uint8_t)(C.CBytes(r))
 	*rx_len = C.uint32_t(len(r))
-	return C.int(0)
+	return COK
 }
