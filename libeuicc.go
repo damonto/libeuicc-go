@@ -1,8 +1,6 @@
 package libeuicc
 
 /*
-#cgo CFLAGS: -I${SRCDIR}/lpac/euicc -I${SRCDIR}/lpac/cjson
-
 #include <stdlib.h>
 
 #include "euicc.h"
