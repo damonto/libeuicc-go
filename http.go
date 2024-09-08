@@ -26,8 +26,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/hex"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -59,7 +57,7 @@ func initHttp(ctx *C.struct_euicc_ctx) {
 
 //export httpTransmit
 func httpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **C.uint8_t, rx_len *C.uint32_t, tx *C.uint8_t, tx_len C.uint32_t, headers **C.char) C.int {
-	req, err := http.NewRequest("POST", C.GoString(url), bytes.NewBufferString(fmt.Sprintf(`{"tx": "%s"}`, hex.EncodeToString(C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))))))
+	req, err := http.NewRequest("POST", C.GoString(url), bytes.NewBuffer(C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))))
 	if err != nil {
 		return C.int(-1)
 	}
@@ -69,7 +67,7 @@ func httpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **
 		req.Header.Add(kv[0], kv[1])
 	}
 
-	http.DefaultClient.Timeout = 30 * time.Second
+	http.DefaultClient.Timeout = 60 * time.Second
 	rootCAs := x509.NewCertPool()
 	for _, cert := range certs {
 		rootCAs.AppendCertsFromPEM([]byte(cert))
@@ -83,7 +81,6 @@ func httpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **
 		return C.int(-1)
 	}
 	defer resp.Body.Close()
-
 	body, _ := io.ReadAll(resp.Body)
 	*rx = (*C.uint8_t)(C.CBytes(body))
 	*rx_len = C.uint32_t(len(body))

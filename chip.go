@@ -15,7 +15,7 @@ type EuiccInfo2 struct {
 	ProfileVersion         string          `json:"profileVersion"`
 	FirmwareVersion        string          `json:"firmwareVersion"`
 	ExtCardResource        ExtCardResource `json:"extCardResource"`
-	PkiForSigning          []string        `json:"ciPKIdListForSigning"`
+	CiPKIdForSigning       []string        `json:"ciPKIdListForSigning"`
 }
 
 type ConfiguredAddresses struct {
@@ -48,7 +48,7 @@ func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
 			FreeNonVolatileMemory: int(euiccInfo2.extCardResource.freeNonVolatileMemory),
 			FreeVolatileMemory:    int(euiccInfo2.extCardResource.freeVolatileMemory),
 		},
-		PkiForSigning: GoStrings(euiccInfo2.euiccCiPKIdListForSigning),
+		CiPKIdForSigning: GoStrings(euiccInfo2.euiccCiPKIdListForSigning),
 	}, nil
 }
 
@@ -64,9 +64,16 @@ func (e *Libeuicc) GetConfiguredAddresses() (*ConfiguredAddresses, error) {
 	}, nil
 }
 
-func (e Libeuicc) Purge() error {
+func (e *Libeuicc) Reset() error {
 	if C.es10c_euicc_memory_reset(e.euiccCtx) == CError {
 		return errors.New("es10c_euicc_memory_reset failed")
+	}
+	return nil
+}
+
+func (e *Libeuicc) SetDefaultSMDPAddress(address string) error {
+	if C.es10a_set_default_dp_address(e.euiccCtx, C.CString(address)) == CError {
+		return errors.New("es10c_set_default_smdp_address failed")
 	}
 	return nil
 }

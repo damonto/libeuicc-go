@@ -1,14 +1,17 @@
 package main
 
 import "C"
-import (
-	"unsafe"
-)
+import "unsafe"
 
 func GoStrings(cStrings **C.char) []string {
-	var slice []string
-	for _, s := range (*[1 << 28]*C.char)(unsafe.Pointer(cStrings))[:2:2] {
-		slice = append(slice, C.GoString(s))
+	var result []string
+	for i := 0; ; i++ {
+		cStr := *(**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cStrings)) + uintptr(i)*unsafe.Sizeof(*cStrings)))
+		if cStr == nil {
+			break
+		}
+		goStr := C.GoString(cStr)
+		result = append(result, goStr)
 	}
-	return slice
+	return result
 }

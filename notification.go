@@ -1,8 +1,6 @@
 package main
 
 /*
-#cgo CFLAGS: -I${SRCDIR}/lpac/cjson
-
 #include "es9p.h"
 #include "es10b.h"
 #include "tostr.h"
@@ -38,6 +36,7 @@ func (e *Libeuicc) GetNotifications() ([]*Notification, error) {
 }
 
 func (e *Libeuicc) ProcessNotification(seqNumber int, remove bool) error {
+	defer e.cleanupHttp()
 	var notification C.struct_es10b_pending_notification
 	if C.es10b_retrieve_notifications_list(e.euiccCtx, &notification, C.ulong(seqNumber)) == CError {
 		return errors.New("es10b_retrieve_notifications_list failed")

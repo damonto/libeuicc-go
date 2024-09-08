@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
-
-	"encoding/hex"
+	"os"
+	"os/signal"
+	"time"
 )
 
 type echoAPDU struct {
@@ -46,12 +48,10 @@ func (a *echoAPDU) transmit(command []byte) ([]byte, error) {
 }
 
 func (a *echoAPDU) Transmit(command []byte) ([]byte, error) {
-	log.Println("Transmit", hex.EncodeToString(command))
 	resp, err := a.transmit(command)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Received", hex.EncodeToString(resp))
 	return resp, nil
 }
 
@@ -61,19 +61,16 @@ func (a *echoAPDU) OpenLogicalChannel(aid []byte) (int, error) {
 		return 0, err
 	}
 	a.channel = logicalChannelResp[0]
-	log.Println("OpenLogicalChannel", a.channel)
 	selectCmd := []byte{a.channel, 0xA4, 0x04, 0x00, byte(len(aid))}
 	selectCmd = append(selectCmd, aid...)
-	resp, err := a.transmit(selectCmd)
+	_, err = a.transmit(selectCmd)
 	if err != nil {
 		return 0, err
 	}
-	log.Println("Select", hex.EncodeToString(resp))
 	return int(a.channel), nil
 }
 
 func (a *echoAPDU) CloseLogicalChannel(channel []byte) error {
-	log.Println("CloseLogicalChannel", channel)
 	_, err := a.transmit([]byte{0x00, 0x70, 0x80, a.channel, 0x00})
 	return err
 }
@@ -86,14 +83,30 @@ func main() {
 	}
 	defer euicc.Free()
 
-	fmt.Println(euicc.GetEid())
-	fmt.Println(euicc.GetEuiccInfo2())
-	ns, err := euicc.GetNotifications()
+	fmt.Println(euicc.ProcessNotification(65, false))
+
+	context, cancel := context.WithDeadline(context.Background(), time.Now().Add(10*time.Minute))
+	err = euicc.DownloadProfile(context, &ActivationCode{
+		SMDP:       "millicomelsalvador.validereachdpplus.com",
+		MatchingId: "GENERICJOWMI-FAHTCU0-SKFMYPW6UIEFGRWC8GE933ITFAUVN63WMUVHFOWTS81",
+	}, func(progress DownloadProgress, profileMetadata *ProfileMetadata, confirmDownloadChan chan bool, confirmationCodeChan chan string) {
+		fmt.Println(progress, profileMetadata)
+		if progress == DownloadProgressConfirmationCodeRequired {
+			confirmationCodeChan <- "123456"
+		}
+		if progress == DownloadProgressConfirmDownload {
+			confirmDownloadChan <- true
+		}
+	})
 	if err != nil {
 		fmt.Println(err)
 		return
+	} else {
+		fmt.Println("Download profile success")
 	}
-	for _, n := range ns {
-		fmt.Println(n.SeqNumber, n.ProfileManagementOperation, n.NotificationAddress, n.ICCID)
-	}
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	<-sig
+	cancel()
 }
