@@ -31,11 +31,13 @@ type ExtCardResource struct {
 	FreeVolatileMemory    int `json:"freeVolatileMemory"`
 }
 
-func (e *Libeuicc) GetEid() string {
+func (e *Libeuicc) GetEid() (string, error) {
 	var eid *C.char
+	if C.es10c_get_eid(e.euiccCtx, &eid) == CError {
+		return "", errors.New("es10c_get_eid failed")
+	}
 	defer C.free(unsafe.Pointer(eid))
-	C.es10c_get_eid(e.euiccCtx, &eid)
-	return C.GoString(eid)
+	return C.GoString(eid), nil
 }
 
 func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
