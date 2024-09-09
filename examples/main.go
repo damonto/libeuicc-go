@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/damonto/libeuicc-go"
 )
@@ -19,32 +23,32 @@ func main() {
 	}
 	defer euicc.Free()
 
-	fmt.Println(euicc.GetEid())
-	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-	// err = euicc.DownloadProfile(ctx, &libeuicc.ActivationCode{
-	// 	SMDP:       "millicomelsalvador.validereachdpplus.com",
-	// 	MatchingId: "GENERICJOWMI-FAHTCU0-SKFMYPW6UIEFGRWC8GE933ITFAUVN63WMUVHFOWTS80",
-	// }, &libeuicc.DownloadOption{
-	// 	ProgressBar: func(progress libeuicc.DownloadProgress) {
-	// 		fmt.Println(progress)
-	// 	},
-	// 	ConfirmFunc: func(metadata *libeuicc.ProfileMetadata) bool {
-	// 		fmt.Println(metadata)
-	// 		return false
-	// 	},
-	// 	ConfirmationCodeFunc: func() string {
-	// 		return ""
-	// 	},
-	// })
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	err = euicc.DownloadProfile(ctx, &libeuicc.ActivationCode{
+		SMDP:       "rsp.septs.app",
+		MatchingId: "123413231",
+	}, &libeuicc.DownloadOption{
+		ProgressBar: func(progress libeuicc.DownloadProgress) {
+			fmt.Println(progress)
+		},
+		ConfirmationCodeFunc: func() string {
+			fmt.Println("Please input confirmation code:")
+			return ""
+		},
+		ConfirmFunc: func(metadata *libeuicc.ProfileMetadata) bool {
+			fmt.Println(metadata)
+			return false
+		},
+	})
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-	// fmt.Println("Download profile success")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Download profile success")
 
-	// sig := make(chan os.Signal, 1)
-	// signal.Notify(sig, os.Interrupt)
-	// <-sig
-	// cancel()
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	<-sig
+	cancel()
 }

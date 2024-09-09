@@ -42,6 +42,12 @@ func NewLibeuicc(apdu APDU) (*Libeuicc, error) {
 func (e *Libeuicc) Free() {
 	e.cleanupHttp()
 	C.euicc_fini(e.euiccCtx)
+	if e.euiccCtx.http._interface != nil {
+		C.free(unsafe.Pointer(e.euiccCtx.http._interface))
+	}
+	if e.euiccCtx.apdu._interface != nil {
+		C.free(unsafe.Pointer(e.euiccCtx.apdu._interface))
+	}
 	C.free(unsafe.Pointer(e.euiccCtx))
 }
 

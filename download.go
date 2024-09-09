@@ -43,6 +43,11 @@ type DownloadOption struct {
 
 type DownloadProgressHandler func(progress DownloadProgress)
 
+var (
+	ErrDownloadCanceled         = errors.New("download canceled")
+	ErrConfirmationCodeRequired = errors.New("confirmation code required")
+)
+
 func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *ActivationCode, downloadOption *DownloadOption) error {
 	defer e.cleanupHttp()
 
@@ -102,7 +107,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 			if err := e.cancelSession(); err != nil {
 				return err
 			}
-			return errors.New("confirmation code required")
+			return ErrConfirmationCodeRequired
 		}
 	}
 
@@ -120,7 +125,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 			if err := e.cancelSession(); err != nil {
 				return err
 			}
-			return errors.New("download cancelled")
+			return ErrDownloadCanceled
 		}
 	}
 
