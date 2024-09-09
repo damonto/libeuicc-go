@@ -14,7 +14,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	euicc, err := libeuicc.NewLibeuicc(pcscReader, libeuicc.NewDefaultLogger(libeuicc.DebugLevel))
+	euicc, err := libeuicc.NewLibeuicc(pcscReader, libeuicc.NewDefaultLogger(libeuicc.LogErrorLevel))
 	if err != nil {
 		fmt.Println(err)
 		return

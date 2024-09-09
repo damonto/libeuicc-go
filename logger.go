@@ -13,17 +13,17 @@ type Logger interface {
 }
 
 const (
-	DebugLevel slog.Level = slog.LevelDebug
-	InfoLevel  slog.Level = slog.LevelInfo
-	WarnLevel  slog.Level = slog.LevelWarn
-	ErrorLevel slog.Level = slog.LevelError
+	LogDebugLevel slog.Level = slog.LevelDebug
+	LogInfoLevel  slog.Level = slog.LevelInfo
+	LogWarnLevel  slog.Level = slog.LevelWarn
+	LogErrorLevel slog.Level = slog.LevelError
 )
 
 type DefaultLogger struct {
 	logger *slog.Logger
 }
 
-var logger Logger = NewDefaultLogger(DebugLevel)
+var logger Logger = NewDefaultLogger(LogErrorLevel)
 
 func NewDefaultLogger(level slog.Level) Logger {
 	slogger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
