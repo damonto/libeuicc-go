@@ -30,8 +30,8 @@ func NewLibeuicc(apdu APDU) (*Libeuicc, error) {
 		euiccCtx: euiccCtx,
 	}
 
-	initAPDU(libeuicc.euiccCtx, apdu)
-	initHttp(libeuicc.euiccCtx)
+	libeuicc.initAPDU(apdu)
+	libeuicc.initHttp()
 
 	if C.euicc_init(libeuicc.euiccCtx) == CError {
 		return nil, ErrEuiccInitFailed

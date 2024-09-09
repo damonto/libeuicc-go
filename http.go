@@ -13,7 +13,8 @@ static int libeuicc_forward_http_transmit(struct euicc_ctx *ctx, const char *url
 	return libeuiccHttpTransmit(ctx, (char *)url, rcode, rx, rx_len, (uint8_t *)tx, tx_len, (char **)headers);
 };
 
-static struct euicc_http_interface *init_http_interface() {
+static struct euicc_http_interface *init_http_interface()
+{
 	struct euicc_http_interface *http = (struct euicc_http_interface *)malloc(sizeof(struct euicc_http_interface));
 
 	http->transmit = libeuicc_forward_http_transmit;
@@ -51,8 +52,8 @@ aFsiLzIEOaUuZwdNUw==
 -----END CERTIFICATE-----`,
 }
 
-func initHttp(ctx *C.struct_euicc_ctx) {
-	ctx.http._interface = C.init_http_interface()
+func (e *Libeuicc) initHttp() {
+	e.euiccCtx.http._interface = C.init_http_interface()
 }
 
 //export libeuiccHttpTransmit

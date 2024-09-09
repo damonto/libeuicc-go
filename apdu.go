@@ -15,7 +15,8 @@ extern int libeuiccApduTransmit(struct euicc_ctx *ctx, uint8_t **rx, uint32_t *r
 static int libeuicc_forward_open_logical_channel(struct euicc_ctx *ctx, const uint8_t *aid, uint8_t aid_len) { return libeuiccApduOpenLogicalChannel(ctx, (uint8_t *)aid, aid_len); }
 static int libeuicc_forward_apdu_transmit(struct euicc_ctx *ctx, uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len) { return libeuiccApduTransmit(ctx, rx, rx_len, (uint8_t *)tx, tx_len); }
 
-static struct euicc_apdu_interface *init_apdu_interface() {
+static struct euicc_apdu_interface *init_apdu_interface()
+{
 	struct euicc_apdu_interface *apdu = (struct euicc_apdu_interface *)malloc(sizeof(struct euicc_apdu_interface));
 
 	apdu->connect = libeuiccApduConnect;
@@ -38,20 +39,20 @@ type APDU interface {
 	CloseLogicalChannel(channel []byte) error
 }
 
-type uctx struct {
+type uContext struct {
 	driver APDU
 }
 
-func initAPDU(ctx *C.struct_euicc_ctx, driver APDU) {
-	ctx.userdata = unsafe.Pointer(&uctx{
+func (e *Libeuicc) initAPDU(driver APDU) {
+	e.euiccCtx.userdata = unsafe.Pointer(&uContext{
 		driver: driver,
 	})
-	ctx.apdu._interface = C.init_apdu_interface()
+	e.euiccCtx.apdu._interface = C.init_apdu_interface()
 }
 
 //export libeuiccApduConnect
 func libeuiccApduConnect(ctx *C.struct_euicc_ctx) C.int {
-	if (*uctx)(ctx.userdata).driver.Connect() != nil {
+	if (*uContext)(ctx.userdata).driver.Connect() != nil {
 		return CError
 	}
 	return COK
@@ -59,13 +60,13 @@ func libeuiccApduConnect(ctx *C.struct_euicc_ctx) C.int {
 
 //export libeuiccApduDisconnect
 func libeuiccApduDisconnect(ctx *C.struct_euicc_ctx) {
-	(*uctx)(ctx.userdata).driver.Disconnect()
+	(*uContext)(ctx.userdata).driver.Disconnect()
 }
 
 //export libeuiccApduOpenLogicalChannel
 func libeuiccApduOpenLogicalChannel(ctx *C.struct_euicc_ctx, aid *C.uint8_t, aid_len C.uint8_t) C.int {
 	b := C.GoBytes(unsafe.Pointer(aid), C.int(aid_len))
-	channel, err := (*uctx)(ctx.userdata).driver.OpenLogicalChannel(b)
+	channel, err := (*uContext)(ctx.userdata).driver.OpenLogicalChannel(b)
 	if err != nil {
 		return CError
 	}
@@ -75,13 +76,13 @@ func libeuiccApduOpenLogicalChannel(ctx *C.struct_euicc_ctx, aid *C.uint8_t, aid
 //export libeuiccApduCloseLogicalChannel
 func libeuiccApduCloseLogicalChannel(ctx *C.struct_euicc_ctx, channel C.uint8_t) {
 	b := C.GoBytes(unsafe.Pointer(&channel), C.int(1))
-	(*uctx)(ctx.userdata).driver.CloseLogicalChannel(b)
+	(*uContext)(ctx.userdata).driver.CloseLogicalChannel(b)
 }
 
 //export libeuiccApduTransmit
 func libeuiccApduTransmit(ctx *C.struct_euicc_ctx, rx **C.uint8_t, rx_len *C.uint32_t, tx *C.uint8_t, tx_len C.uint32_t) C.int {
 	b := C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))
-	r, err := (*uctx)(ctx.userdata).driver.Transmit(b)
+	r, err := (*uContext)(ctx.userdata).driver.Transmit(b)
 	if err != nil {
 		return CError
 	}

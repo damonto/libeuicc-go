@@ -35,9 +35,15 @@ type ProfileMetadata struct {
 	Icon         string          `json:"icon"`
 }
 
-type DownloadProgressHandler func(progress DownloadProgress, profileMetadata *ProfileMetadata, confirmDownloadChan chan bool, confirmationCodeChan chan string)
+type DownloadOption struct {
+	ProgressBar          func(progress DownloadProgress)
+	ConfirmFunc          func(metadata *ProfileMetadata) bool
+	ConfirmationCodeFunc func() string
+}
 
-func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *ActivationCode, progressHandler DownloadProgressHandler) error {
+type DownloadProgressHandler func(progress DownloadProgress)
+
+func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *ActivationCode, downloadOption *DownloadOption) error {
 	defer e.cleanupHttp()
 
 	cSmdp := C.CString(activationCode.SMDP)
@@ -51,18 +57,15 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 
 	e.euiccCtx.http.server_address = cSmdp
 
-	progressHandler(DownloadProgressGetChallenge, nil, nil, nil)
+	e.handleProgress(downloadOption, DownloadProgressGetChallenge)
 	if (C.es10b_get_euicc_challenge_and_info(e.euiccCtx)) == CError {
 		return errors.New("es10b_get_euicc_challenge_and_info failed")
-	}
-	if e.isCanceled(ctx) {
-		return e.cancelSession()
 	}
 
 	if e.isCanceled(ctx) {
 		return e.cancelSession()
 	}
-	progressHandler(DownloadProgressInitiateAuthentication, nil, nil, nil)
+	e.handleProgress(downloadOption, DownloadProgressInitiateAuthentication)
 	if C.es9p_initiate_authentication(e.euiccCtx) == CError {
 		return errors.New("es9p_initiate_authentication failed")
 	}
@@ -70,7 +73,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	if e.isCanceled(ctx) {
 		return e.cancelSession()
 	}
-	progressHandler(DownloadProgressAuthenticateServer, nil, nil, nil)
+	e.handleProgress(downloadOption, DownloadProgressAuthenticateServer)
 	if C.es10b_authenticate_server(e.euiccCtx, cMatchingId, cImei) == CError {
 		return errors.New("es10b_authenticate_server failed")
 	}
@@ -78,7 +81,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	if e.isCanceled(ctx) {
 		return e.cancelSession()
 	}
-	progressHandler(DownloadProgressAuthenticateClient, nil, nil, nil)
+	e.handleProgress(downloadOption, DownloadProgressAuthenticateClient)
 	if C.es9p_authenticate_client(e.euiccCtx) != COK {
 		return e.wrapES9PError()
 	}
@@ -91,16 +94,16 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		return err
 	}
 	if ccRequired && activationCode.ConfirmationCode == "" {
-		confirmationCodeChan := make(chan string, 1)
-		progressHandler(DownloadProgressConfirmationCodeRequired, nil, nil, confirmationCodeChan)
-		confirmationCode := <-confirmationCodeChan
-		if confirmationCode == "" {
+		e.handleProgress(downloadOption, DownloadProgressConfirmationCodeRequired)
+		if downloadOption != nil || downloadOption.ConfirmationCodeFunc != nil {
+			cConfirmationCode = C.CString(downloadOption.ConfirmationCodeFunc())
+		}
+		if cConfirmationCode == nil {
 			if err := e.cancelSession(); err != nil {
 				return err
 			}
 			return errors.New("confirmation code required")
 		}
-		cConfirmationCode = C.CString(confirmationCode)
 	}
 
 	profileMetadata, err := e.parseProfileMetadata()
@@ -110,17 +113,21 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		}
 		return err
 	}
-	confirmDownloadChan := make(chan bool, 1)
-	progressHandler(DownloadProgressConfirmDownload, profileMetadata, confirmDownloadChan, nil)
-	confirmDownload := <-confirmDownloadChan
-	if !confirmDownload {
-		if err := e.cancelSession(); err != nil {
-			return err
+	e.handleProgress(downloadOption, DownloadProgressConfirmDownload)
+	if downloadOption != nil && downloadOption.ConfirmFunc != nil {
+		confirmDownload := downloadOption.ConfirmFunc(profileMetadata)
+		if !confirmDownload {
+			if err := e.cancelSession(); err != nil {
+				return err
+			}
+			return errors.New("download cancelled")
 		}
-		return errors.New("download cancelled")
 	}
 
-	progressHandler(DownloadProgressPrepareDownload, nil, nil, nil)
+	if e.isCanceled(ctx) {
+		return e.cancelSession()
+	}
+	e.handleProgress(downloadOption, DownloadProgressConfirmDownload)
 	if C.es10b_prepare_download(e.euiccCtx, cConfirmationCode) == CError {
 		return errors.New("es10b_prepare_download failed")
 	}
@@ -128,7 +135,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	if e.isCanceled(ctx) {
 		return e.cancelSession()
 	}
-	progressHandler(DownloadProgressGetBoundProfile, nil, nil, nil)
+	e.handleProgress(downloadOption, DownloadProgressGetBoundProfile)
 	if C.es9p_get_bound_profile_package(e.euiccCtx) == CError {
 		return errors.New("es9p_get_bound_profile_package failed")
 	}
@@ -144,7 +151,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		return errors.New("failed to allocate memory for downloadResult")
 	}
 	defer C.free(unsafe.Pointer(downloadResult))
-	progressHandler(DownloadProgressLoadBoundProfile, nil, nil, nil)
+	e.handleProgress(downloadOption, DownloadProgressLoadBoundProfile)
 	if C.es10b_load_bound_profile_package(e.euiccCtx, downloadResult) != COK {
 		if err := e.cancelSession(); err != nil {
 			return err
@@ -152,6 +159,13 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		return e.wrapLoadBPPError(downloadResult)
 	}
 	return nil
+}
+
+func (e *Libeuicc) handleProgress(downloadOption *DownloadOption, progress DownloadProgress) {
+	if downloadOption == nil || downloadOption.ProgressBar == nil {
+		return
+	}
+	downloadOption.ProgressBar(progress)
 }
 
 func (e *Libeuicc) wrapLoadBPPError(downloadResult *C.struct_es10b_load_bound_profile_package_result) error {
@@ -196,8 +210,7 @@ func (e *Libeuicc) isConfirmationCodeRequired() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	b64s := string(base64decodedSmdpSigned2)
-	cB64s := C.CString(b64s)
+	cB64s := C.CString(string(base64decodedSmdpSigned2))
 	defer C.free(unsafe.Pointer(cB64s))
 
 	smdpSigned2 := (*C.struct_euicc_derutil_node)(C.malloc(C.sizeof_struct_euicc_derutil_node))
@@ -217,9 +230,7 @@ func (e *Libeuicc) isConfirmationCodeRequired() (bool, error) {
 	if C.euicc_derutil_unpack_find_tag(ccFlag, 0x01, smdpSigned2.value, smdpSigned2.length) == CError {
 		return false, errors.New("euicc_derutil_unpack_find_tag failed")
 	}
-
-	required := C.euicc_derutil_convert_bin2long(ccFlag.value, ccFlag.length) != 0
-	return required, nil
+	return C.euicc_derutil_convert_bin2long(ccFlag.value, ccFlag.length) != 0, nil
 }
 
 func (e *Libeuicc) parseProfileMetadata() (*ProfileMetadata, error) {
