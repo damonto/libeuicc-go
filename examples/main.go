@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/signal"
 	"time"
 
 	"github.com/damonto/libeuicc-go"
@@ -29,7 +27,9 @@ func main() {
 		MatchingId: "123413231",
 	}, &libeuicc.DownloadOption{
 		ProgressBar: func(progress libeuicc.DownloadProgress) {
-			fmt.Println(progress)
+			if progress == libeuicc.DownloadProgressAuthenticateServer {
+				cancel()
+			}
 		},
 		ConfirmationCodeFunc: func() string {
 			fmt.Println("Please input confirmation code:")
@@ -46,9 +46,4 @@ func main() {
 		return
 	}
 	fmt.Println("Download profile success")
-
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-	<-sig
-	cancel()
 }

@@ -67,25 +67,16 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		return errors.New("es10b_get_euicc_challenge_and_info failed")
 	}
 
-	if e.isCanceled(ctx) {
-		return e.cancelSession()
-	}
 	e.handleProgress(downloadOption, DownloadProgressInitiateAuthentication)
 	if C.es9p_initiate_authentication(e.euiccCtx) == CError {
 		return errors.New("es9p_initiate_authentication failed")
 	}
 
-	if e.isCanceled(ctx) {
-		return e.cancelSession()
-	}
 	e.handleProgress(downloadOption, DownloadProgressAuthenticateServer)
 	if C.es10b_authenticate_server(e.euiccCtx, cMatchingId, cImei) == CError {
 		return errors.New("es10b_authenticate_server failed")
 	}
 
-	if e.isCanceled(ctx) {
-		return e.cancelSession()
-	}
 	e.handleProgress(downloadOption, DownloadProgressAuthenticateClient)
 	if C.es9p_authenticate_client(e.euiccCtx) != COK {
 		return e.wrapES9PError()
