@@ -86,8 +86,8 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 
 	ccRequired, err := e.isConfirmationCodeRequired()
 	if err != nil {
-		if err := e.cancelSession(); err != nil {
-			return err
+		if cancelErr := e.cancelSession(); cancelErr != nil {
+			return errors.Join(err, cancelErr)
 		}
 		return err
 	}
@@ -98,7 +98,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		}
 		if cConfirmationCode == nil {
 			if err := e.cancelSession(); err != nil {
-				return err
+				return errors.Join(ErrConfirmationCodeRequired, err)
 			}
 			return ErrConfirmationCodeRequired
 		}
@@ -106,8 +106,8 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 
 	profileMetadata, err := e.parseProfileMetadata()
 	if err != nil {
-		if err := e.cancelSession(); err != nil {
-			return err
+		if cancelErr := e.cancelSession(); cancelErr != nil {
+			return errors.Join(err, cancelErr)
 		}
 		return err
 	}
@@ -116,7 +116,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		confirmDownload := downloadOption.ConfirmFunc(profileMetadata)
 		if !confirmDownload {
 			if err := e.cancelSession(); err != nil {
-				return err
+				return errors.Join(ErrDownloadCanceled, err)
 			}
 			return ErrDownloadCanceled
 		}
@@ -144,7 +144,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	downloadResult := (*C.struct_es10b_load_bound_profile_package_result)(C.malloc(C.sizeof_struct_es10b_load_bound_profile_package_result))
 	if downloadResult == nil {
 		if err := e.cancelSession(); err != nil {
-			return err
+			return errors.Join(errors.New("failed to allocate memory for downloadResult"), err)
 		}
 		return errors.New("failed to allocate memory for downloadResult")
 	}
@@ -152,7 +152,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	e.handleProgress(downloadOption, DownloadProgressLoadBoundProfile)
 	if C.es10b_load_bound_profile_package(e.euiccCtx, downloadResult) != COK {
 		if err := e.cancelSession(); err != nil {
-			return err
+			return errors.Join(e.wrapLoadBPPError(downloadResult), err)
 		}
 		return e.wrapLoadBPPError(downloadResult)
 	}
