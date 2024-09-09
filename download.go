@@ -93,7 +93,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	}
 	if ccRequired && activationCode.ConfirmationCode == "" {
 		e.handleProgress(downloadOption, DownloadProgressConfirmationCodeRequired)
-		if downloadOption != nil || downloadOption.ConfirmationCodeFunc != nil {
+		if downloadOption != nil && downloadOption.ConfirmationCodeFunc != nil {
 			cConfirmationCode = C.CString(downloadOption.ConfirmationCodeFunc())
 		}
 		if cConfirmationCode == nil {
