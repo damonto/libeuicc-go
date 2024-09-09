@@ -66,11 +66,11 @@ func (p *PCSCReader) Connect() error {
 func (p *PCSCReader) Disconnect() error {
 	defer goscard.Finalize()
 	if _, err := p.card.Disconnect(goscard.SCardLeaveCard); err != nil {
-		logger.Errorf("error disconnecting card", err)
+		logger.Error("apdu error disconnecting card", err)
 		return err
 	}
 	if _, err := p.context.Release(); err != nil {
-		logger.Errorf("error releasing context", err)
+		logger.Error("apdu error releasing context", err)
 		return err
 	}
 	return nil

@@ -42,12 +42,12 @@ type APDU interface {
 	CloseLogicalChannel(channel []byte) error
 }
 
-type uContext struct {
+type APDUContext struct {
 	driver APDU
 }
 
 func (e *Libeuicc) initAPDU(driver APDU) {
-	e.euiccCtx.userdata = unsafe.Pointer(&uContext{
+	e.euiccCtx.userdata = unsafe.Pointer(&APDUContext{
 		driver: driver,
 	})
 	e.euiccCtx.apdu._interface = C.init_apdu_interface()
@@ -55,52 +55,52 @@ func (e *Libeuicc) initAPDU(driver APDU) {
 
 //export libeuiccApduConnect
 func libeuiccApduConnect(ctx *C.struct_euicc_ctx) C.int {
-	if err := (*uContext)(ctx.userdata).driver.Connect(); err != nil {
-		logger.Errorf("APDU connect failed", err)
+	if err := (*APDUContext)(ctx.userdata).driver.Connect(); err != nil {
+		logger.Error("APDU connect failed", err)
 		return CError
 	}
-	logger.Debugf("APDU connect success")
+	logger.Debug("APDU connect success")
 	return COK
 }
 
 //export libeuiccApduDisconnect
 func libeuiccApduDisconnect(ctx *C.struct_euicc_ctx) {
-	if err := (*uContext)(ctx.userdata).driver.Disconnect(); err != nil {
-		logger.Errorf("APDU disconnect failed", err)
+	if err := (*APDUContext)(ctx.userdata).driver.Disconnect(); err != nil {
+		logger.Error("APDU disconnect failed", err)
 	}
-	logger.Debugf("APDU disconnect success")
+	logger.Debug("APDU disconnect success")
 }
 
 //export libeuiccApduOpenLogicalChannel
 func libeuiccApduOpenLogicalChannel(ctx *C.struct_euicc_ctx, aid *C.uint8_t, aid_len C.uint8_t) C.int {
 	b := C.GoBytes(unsafe.Pointer(aid), C.int(aid_len))
-	channel, err := (*uContext)(ctx.userdata).driver.OpenLogicalChannel(b)
+	channel, err := (*APDUContext)(ctx.userdata).driver.OpenLogicalChannel(b)
 	if err != nil {
-		logger.Errorf("APDU open logical channel failed", err)
+		logger.Error("APDU open logical channel failed", err)
 		return CError
 	}
-	logger.Debugf("APDU open logical channel success", "channel", channel)
+	logger.Debug("APDU open logical channel success", "channel", channel)
 	return C.int(channel)
 }
 
 //export libeuiccApduCloseLogicalChannel
 func libeuiccApduCloseLogicalChannel(ctx *C.struct_euicc_ctx, channel C.uint8_t) {
 	b := C.GoBytes(unsafe.Pointer(&channel), C.int(1))
-	if err := (*uContext)(ctx.userdata).driver.CloseLogicalChannel(b); err != nil {
-		logger.Errorf("APDU close logical channel failed", err, "channel", channel)
+	if err := (*APDUContext)(ctx.userdata).driver.CloseLogicalChannel(b); err != nil {
+		logger.Error("APDU close logical channel failed", err, "channel", channel)
 	}
-	logger.Debugf("APDU close logical channel success", "channel", channel)
+	logger.Debug("APDU close logical channel success", "channel", channel)
 }
 
 //export libeuiccApduTransmit
 func libeuiccApduTransmit(ctx *C.struct_euicc_ctx, rx **C.uint8_t, rx_len *C.uint32_t, tx *C.uint8_t, tx_len C.uint32_t) C.int {
 	b := C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))
-	r, err := (*uContext)(ctx.userdata).driver.Transmit(b)
+	r, err := (*APDUContext)(ctx.userdata).driver.Transmit(b)
 	if err != nil {
-		logger.Errorf("APDU transmit failed", err, "command", hex.EncodeToString(b))
+		logger.Error("APDU transmit failed", err, "command", hex.EncodeToString(b))
 		return CError
 	}
-	logger.Debugf("APDU transmit success", "command", hex.EncodeToString(b), "response", hex.EncodeToString(r))
+	logger.Debug("APDU transmit success", "command", hex.EncodeToString(b), "response", hex.EncodeToString(r))
 	*rx = (*C.uint8_t)(C.CBytes(r))
 	*rx_len = C.uint32_t(len(r))
 	return COK

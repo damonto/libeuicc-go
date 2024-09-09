@@ -256,7 +256,7 @@ func (e *Libeuicc) initHttp() {
 func libeuiccHttpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t, rx **C.uint8_t, rx_len *C.uint32_t, tx *C.uint8_t, tx_len C.uint32_t, headers **C.char) C.int {
 	r, err := http.NewRequest("POST", C.GoString(url), bytes.NewBuffer(C.GoBytes(unsafe.Pointer(tx), C.int(tx_len))))
 	if err != nil {
-		logger.Errorf("Failed to create http request", err)
+		logger.Error("Failed to create http request", err)
 		return CError
 	}
 
@@ -285,10 +285,10 @@ func libeuiccHttpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_
 	defer r.Body.Close()
 	defer resp.Body.Close()
 	if err != nil {
-		logger.Errorf("Failed to send http request", err, "url", r.URL.String(), "request", string(reqBody), "status", resp.StatusCode, "response", string(body))
+		logger.Error("Failed to send http request", err, "url", r.URL.String(), "request", string(reqBody), "status", resp.StatusCode, "response", string(body))
 		return CError
 	}
-	logger.Debugf("Http transmit success", "url", r.URL.String(), "request", string(reqBody), "status", resp.StatusCode, "response", string(body))
+	logger.Debug("Http transmit success", "url", r.URL.String(), "request", string(reqBody), "status", resp.StatusCode, "response", string(body))
 
 	*rx = (*C.uint8_t)(C.CBytes(body))
 	*rx_len = C.uint32_t(len(body))

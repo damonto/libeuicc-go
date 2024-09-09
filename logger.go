@@ -6,10 +6,10 @@ import (
 )
 
 type Logger interface {
-	Debugf(format string, args ...any)
-	Infof(format string, args ...any)
-	Warnf(format string, args ...any)
-	Errorf(format string, err error, args ...any)
+	Debug(format string, args ...any)
+	Info(format string, args ...any)
+	Warn(format string, args ...any)
+	Error(format string, err error, args ...any)
 }
 
 const (
@@ -34,19 +34,19 @@ func NewDefaultLogger(level slog.Level) Logger {
 	}
 }
 
-func (l *DefaultLogger) Debugf(format string, args ...any) {
+func (l *DefaultLogger) Debug(format string, args ...any) {
 	l.logger.Debug(format, args...)
 }
 
-func (l *DefaultLogger) Infof(format string, args ...any) {
+func (l *DefaultLogger) Info(format string, args ...any) {
 	l.logger.Info(format, args...)
 }
 
-func (l *DefaultLogger) Warnf(format string, args ...any) {
+func (l *DefaultLogger) Warn(format string, args ...any) {
 	l.logger.Warn(format, args...)
 }
 
-func (l *DefaultLogger) Errorf(format string, err error, args ...any) {
+func (l *DefaultLogger) Error(format string, err error, args ...any) {
 	args = append([]any{"error", err}, args...)
 	l.logger.Error(format, args...)
 }
