@@ -1,6 +1,8 @@
 package libeuicc
 
 /*
+#include <stdlib.h>
+
 #include "es10a.h"
 #include "es10c.h"
 #include "es10c_ex.h"
@@ -8,6 +10,7 @@ package libeuicc
 import "C"
 import (
 	"errors"
+	"unsafe"
 )
 
 type EuiccInfo2 struct {
@@ -30,6 +33,7 @@ type ExtCardResource struct {
 
 func (e *Libeuicc) GetEid() string {
 	var eid *C.char
+	defer C.free(unsafe.Pointer(eid))
 	C.es10c_get_eid(e.euiccCtx, &eid)
 	return C.GoString(eid)
 }
@@ -72,7 +76,9 @@ func (e *Libeuicc) Reset() error {
 }
 
 func (e *Libeuicc) SetDefaultSMDPAddress(address string) error {
-	if C.es10a_set_default_dp_address(e.euiccCtx, C.CString(address)) == CError {
+	cAddress := C.CString(address)
+	defer C.free(unsafe.Pointer(cAddress))
+	if C.es10a_set_default_dp_address(e.euiccCtx, cAddress) == CError {
 		return errors.New("es10c_set_default_smdp_address failed")
 	}
 	return nil

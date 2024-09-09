@@ -21,6 +21,8 @@ func main() {
 	}
 	defer euicc.Free()
 
+	fmt.Println(euicc.GetEuiccInfo2())
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	err = euicc.DownloadProfile(ctx, &libeuicc.ActivationCode{
 		SMDP:       "rsp.septs.app",
