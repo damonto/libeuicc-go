@@ -60,6 +60,8 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	defer C.free(unsafe.Pointer(cSmdp))
 	defer C.free(unsafe.Pointer(cConfirmationCode))
 
+	logger.Debugf("Downloading profile", "smdp", activationCode.SMDP, "matchingId", activationCode.MatchingId, "imei", activationCode.IMEI, "confirmationCode", activationCode.ConfirmationCode)
+
 	e.euiccCtx.http.server_address = cSmdp
 
 	e.handleProgress(downloadOption, DownloadProgressGetChallenge)

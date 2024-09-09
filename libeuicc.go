@@ -20,7 +20,11 @@ var (
 	ErrNotEnoughMemory = errors.New("not enough memory")
 )
 
-func NewLibeuicc(apdu APDU) (*Libeuicc, error) {
+func NewLibeuicc(apdu APDU, customLogger Logger) (*Libeuicc, error) {
+	if customLogger != nil {
+		logger = customLogger
+	}
+
 	euiccCtx := (*C.struct_euicc_ctx)(C.malloc(C.sizeof_struct_euicc_ctx))
 	if euiccCtx == nil {
 		return nil, ErrNotEnoughMemory
@@ -29,7 +33,6 @@ func NewLibeuicc(apdu APDU) (*Libeuicc, error) {
 	libeuicc := &Libeuicc{
 		euiccCtx: euiccCtx,
 	}
-
 	libeuicc.initAPDU(apdu)
 	libeuicc.initHttp()
 

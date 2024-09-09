@@ -64,11 +64,13 @@ func (p *PCSCReader) Connect() error {
 }
 
 func (p *PCSCReader) Disconnect() error {
-	goscard.Finalize()
-	if _, err := p.context.Release(); err != nil {
+	defer goscard.Finalize()
+	if _, err := p.card.Disconnect(goscard.SCardLeaveCard); err != nil {
+		logger.Errorf("error disconnecting card", err)
 		return err
 	}
-	if _, err := p.card.Disconnect(goscard.SCardLeaveCard); err != nil {
+	if _, err := p.context.Release(); err != nil {
+		logger.Errorf("error releasing context", err)
 		return err
 	}
 	return nil

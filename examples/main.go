@@ -14,14 +14,14 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	euicc, err := libeuicc.NewLibeuicc(pcscReader)
+	euicc, err := libeuicc.NewLibeuicc(pcscReader, libeuicc.NewDefaultLogger(libeuicc.DebugLevel))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer euicc.Free()
 
-	fmt.Println(euicc.GetEuiccInfo2())
+	fmt.Println(euicc.GetEid())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	err = euicc.DownloadProfile(ctx, &libeuicc.ActivationCode{
