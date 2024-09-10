@@ -2,10 +2,14 @@ github.com/ElMostafaIdrassi/goscard v0.0.0-20230429163448-3aed127e7220 h1:E9va15
 github.com/ElMostafaIdrassi/goscard v0.0.0-20230429163448-3aed127e7220/go.mod h1:bZP3mHtk8JxScKYUq/fbwT8IBazQ/ZfuDArIE8Xfi08=
 github.com/damonto/libeuicc-go v0.0.0-20240910044608-5d2f08e5da76 h1:LPUbDDBrZAx9mv0q9b/b3uVcoYFts8lR+ubv4QwqhwM=
 github.com/damonto/libeuicc-go v0.0.0-20240910044608-5d2f08e5da76/go.mod h1:/E4KPGI5yUzcgI0TROolgVCG0o3vf9bim/pAuCqipN8=
+github.com/damonto/libeuicc-go v0.0.0-20240910062538-fe5f63e8278b h1:gcP4BpNlr/xPaXKKLOODFasMQn/TzuBHDH68H1peTTU=
+github.com/damonto/libeuicc-go v0.0.0-20240910062538-fe5f63e8278b/go.mod h1:/E4KPGI5yUzcgI0TROolgVCG0o3vf9bim/pAuCqipN8=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/ebitengine/purego v0.3.2 h1:+pV+tskAkn/bxEcUzGtDfw2VAe3bRQ26kdzFjPPrCww=
 github.com/ebitengine/purego v0.3.2/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
+github.com/ebitengine/purego v0.7.1 h1:6/55d26lG3o9VCZX8lping+bZcmShseiqlh2bnUDiPA=
+github.com/ebitengine/purego v0.7.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -14,5 +18,7 @@ github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.25.0 h1:r+8e+loiHxRqhXVl6ML1nO3l1+oFoWbnlu2Ehimmi34=
+golang.org/x/sys v0.25.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

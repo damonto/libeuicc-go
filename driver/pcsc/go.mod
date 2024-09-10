@@ -4,10 +4,10 @@ go 1.23.1
 
 require (
 	github.com/ElMostafaIdrassi/goscard v0.0.0-20230429163448-3aed127e7220
-	github.com/damonto/libeuicc-go v0.0.0-20240910044608-5d2f08e5da76
+	github.com/damonto/libeuicc-go v0.0.0-20240910062538-fe5f63e8278b
 )
 
 require (
-	github.com/ebitengine/purego v0.3.2 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	github.com/ebitengine/purego v0.7.1 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 )

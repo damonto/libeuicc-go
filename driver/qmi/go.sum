@@ -1,2 +1,4 @@
 github.com/damonto/libeuicc-go v0.0.0-20240910044608-5d2f08e5da76 h1:LPUbDDBrZAx9mv0q9b/b3uVcoYFts8lR+ubv4QwqhwM=
 github.com/damonto/libeuicc-go v0.0.0-20240910044608-5d2f08e5da76/go.mod h1:/E4KPGI5yUzcgI0TROolgVCG0o3vf9bim/pAuCqipN8=
+github.com/damonto/libeuicc-go v0.0.0-20240910062538-fe5f63e8278b h1:gcP4BpNlr/xPaXKKLOODFasMQn/TzuBHDH68H1peTTU=
+github.com/damonto/libeuicc-go v0.0.0-20240910062538-fe5f63e8278b/go.mod h1:/E4KPGI5yUzcgI0TROolgVCG0o3vf9bim/pAuCqipN8=
