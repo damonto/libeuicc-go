@@ -52,7 +52,7 @@ qmi_client_uim_send_apdu_sync(
     GMainContext *context,
     GError **error);
 
-int libeuicc_qmi_apdu_connect(int uim_slot, char *device_path);
+int libeuicc_qmi_apdu_connect(char *device_path, int uim_slot);
 void libeuicc_qmi_apdu_disconnect();
 int libeuicc_qmi_apdu_transmit(uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len);
 int libeuicc_qmi_apdu_open_logical_channel(const uint8_t *aid, uint8_t aid_len);

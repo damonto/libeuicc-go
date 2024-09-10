@@ -1,7 +1,6 @@
 package driver
 
 /*
-#cgo CFLAGS: -I${SRCDIR}
 #cgo pkg-config: glib-2.0 qmi-glib
 
 #include <stdint.h>
@@ -19,13 +18,12 @@ import (
 type qmi struct {
 	uimSlot int
 	device  string
-	channel int
 }
 
-func NewQMI(uimSlot int, device string) libeuicc.APDU {
+func NewQMI(device string, uimSlot int) libeuicc.APDU {
 	return &qmi{
-		uimSlot: uimSlot,
 		device:  device,
+		uimSlot: uimSlot,
 	}
 }
 
@@ -33,7 +31,7 @@ func (q *qmi) Connect() error {
 	cDevice := C.CString(q.device)
 	defer C.free(unsafe.Pointer(cDevice))
 
-	if C.libeuicc_qmi_apdu_connect(C.int(q.uimSlot), cDevice) == -1 {
+	if C.libeuicc_qmi_apdu_connect(cDevice, C.int(q.uimSlot)) == -1 {
 		return errors.New("failed to connect to QMI")
 	}
 	return nil

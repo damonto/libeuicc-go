@@ -187,7 +187,7 @@ qmi_client_uim_send_apdu_sync(
     return qmi_client_uim_send_apdu_finish(client, result, error);
 }
 
-int libeuicc_qmi_apdu_connect(int uim_slot, char *device_path)
+int libeuicc_qmi_apdu_connect(char *device_path, int uim_slot)
 {
     g_autoptr(GError) error = NULL;
     QmiDevice *device = NULL;
@@ -240,6 +240,9 @@ void libeuicc_qmi_apdu_disconnect()
 
     qmi_device_release_client_sync(device, client, qmi_priv->context, &error);
     qmi_priv->uimClient = NULL;
+
+    if (error)
+        fprintf(stderr, "error: release QMI client failed: %s\n", error->message);
 
     g_main_context_unref(qmi_priv->context);
     qmi_priv->context = NULL;
