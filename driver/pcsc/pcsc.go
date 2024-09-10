@@ -1,4 +1,4 @@
-package libeuicc
+package pcsc
 
 import (
 	"errors"

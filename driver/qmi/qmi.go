@@ -1,4 +1,4 @@
-package driver
+package qmi
 
 /*
 #cgo pkg-config: glib-2.0 qmi-glib
