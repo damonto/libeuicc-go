@@ -47,16 +47,16 @@ func (e *Libeuicc) GetProfiles() ([]*Profile, error) {
 	return profiles, nil
 }
 
-func (e *Libeuicc) EnableProfile(iccid string, refrestFlag int) error {
+func (e *Libeuicc) EnableProfile(iccid string, refreshFlag int) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
-	return e.wrapProfileOperationError(C.es10c_enable_profile(e.ctx, cIccid, C.uint8_t(refrestFlag)))
+	return e.wrapProfileOperationError(C.es10c_enable_profile(e.ctx, cIccid, C.uint8_t(refreshFlag)))
 }
 
-func (e *Libeuicc) DisableProfile(iccid string, refrestFlag int) error {
+func (e *Libeuicc) DisableProfile(iccid string, refreshFlag int) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
-	return e.wrapProfileOperationError(C.es10c_disable_profile(e.ctx, cIccid, C.uint8_t(refrestFlag)))
+	return e.wrapProfileOperationError(C.es10c_disable_profile(e.ctx, cIccid, C.uint8_t(refreshFlag)))
 }
 
 func (e *Libeuicc) DeleteProfile(iccid string) error {
