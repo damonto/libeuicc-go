@@ -20,7 +20,7 @@ var (
 	ErrNotEnoughMemory = errors.New("not enough memory")
 )
 
-func NewEuicc(driver APDU, customLogger Logger) (*Libeuicc, error) {
+func NewLibeuicc(driver APDU, customLogger Logger) (*Libeuicc, error) {
 	if customLogger != nil {
 		logger = customLogger
 	}
