@@ -39,7 +39,7 @@ type APDU interface {
 	Disconnect() error
 	Transmit(command []byte) ([]byte, error)
 	OpenLogicalChannel(aid []byte) (int, error)
-	CloseLogicalChannel(channel []byte) error
+	CloseLogicalChannel(channel int) error
 }
 
 type APDUContext struct {
@@ -85,8 +85,7 @@ func libeuiccApduOpenLogicalChannel(ctx *C.struct_euicc_ctx, aid *C.uint8_t, aid
 
 //export libeuiccApduCloseLogicalChannel
 func libeuiccApduCloseLogicalChannel(ctx *C.struct_euicc_ctx, channel C.uint8_t) {
-	b := C.GoBytes(unsafe.Pointer(&channel), C.int(1))
-	if err := (*APDUContext)(ctx.userdata).driver.CloseLogicalChannel(b); err != nil {
+	if err := (*APDUContext)(ctx.userdata).driver.CloseLogicalChannel(int(channel)); err != nil {
 		logger.Error("APDU close logical channel failed", err, "channel", channel)
 	}
 	logger.Debug("APDU close logical channel success", "channel", channel)

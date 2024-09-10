@@ -106,8 +106,8 @@ func (p *PCSCReader) OpenLogicalChannel(aid []byte) (int, error) {
 	return int(p.channel), nil
 }
 
-func (p *PCSCReader) CloseLogicalChannel(channel []byte) error {
-	command := []byte{0x00, 0x70, 0x80, channel[0], 0x00}
+func (p *PCSCReader) CloseLogicalChannel(channel int) error {
+	command := []byte{0x00, 0x70, 0x80, byte(channel), 0x00}
 	_, err := p.Transmit(command)
 	return err
 }
