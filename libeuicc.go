@@ -20,7 +20,7 @@ var (
 	ErrNotEnoughMemory = errors.New("not enough memory")
 )
 
-func NewLibeuicc(driver APDU, customLogger Logger) (*Libeuicc, error) {
+func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 	if customLogger != nil {
 		logger = customLogger
 	}
@@ -42,7 +42,7 @@ func NewLibeuicc(driver APDU, customLogger Logger) (*Libeuicc, error) {
 	return libeuicc, nil
 }
 
-func (e *Libeuicc) Free() {
+func (e *Libeuicc) Close() {
 	e.cleanupHttp()
 	C.euicc_fini(e.ctx)
 	if e.ctx.http._interface != nil {

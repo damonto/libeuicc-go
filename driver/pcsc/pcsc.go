@@ -20,7 +20,7 @@ type PCSCReader struct {
 	reader  string
 }
 
-func NewPCSCReader() (PCSC, error) {
+func New() (PCSC, error) {
 	pcsc := &PCSCReader{}
 	if err := goscard.Initialize(goscard.NewDefaultLogger(goscard.LogLevelNone)); err != nil {
 		return nil, err

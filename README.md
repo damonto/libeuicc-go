@@ -14,17 +14,17 @@ import (
 )
 
 func main() {
-	pcscReader, err := pcsc.NewPCSCReader()
+	pcscReader, err := pcsc.New()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	euicc, err := libeuicc.NewLibeuicc(pcscReader, libeuicc.NewDefaultLogger(libeuicc.LogErrorLevel))
+	euicc, err := libeuicc.New(pcscReader, libeuicc.NewDefaultLogger(libeuicc.LogErrorLevel))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer euicc.Free()
+	defer euicc.Close()
 
 	fmt.Println(euicc.GetEid())
 

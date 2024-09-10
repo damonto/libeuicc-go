@@ -22,7 +22,7 @@ type qmi struct {
 	device  string
 }
 
-func NewQMI(device string, uimSlot int) libeuicc.APDU {
+func New(device string, uimSlot int) libeuicc.APDU {
 	return &qmi{
 		device:  device,
 		uimSlot: uimSlot,
