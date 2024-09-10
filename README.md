@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	pcscReader, err := libeuicc.NewPCSCReader()
+	pcscReader, err := pcsc.NewPCSCReader()
 	if err != nil {
 		fmt.Println(err)
 		return
