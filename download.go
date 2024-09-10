@@ -125,7 +125,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	if e.isCanceled(ctx) {
 		return e.cancelSession()
 	}
-	e.handleProgress(downloadOption, DownloadProgressConfirmDownload)
+	e.handleProgress(downloadOption, DownloadProgressPrepareDownload)
 	if C.es10b_prepare_download(e.ctx, cConfirmationCode) == CError {
 		return errors.New("es10b_prepare_download failed")
 	}

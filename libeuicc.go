@@ -43,7 +43,6 @@ func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 }
 
 func (e *Libeuicc) Close() {
-	e.cleanupHttp()
 	C.euicc_fini(e.ctx)
 	if e.ctx.http._interface != nil {
 		C.free(unsafe.Pointer(e.ctx.http._interface))
@@ -51,7 +50,9 @@ func (e *Libeuicc) Close() {
 	if e.ctx.apdu._interface != nil {
 		C.free(unsafe.Pointer(e.ctx.apdu._interface))
 	}
-	C.free(unsafe.Pointer(e.ctx))
+	if e.ctx != nil {
+		C.free(unsafe.Pointer(e.ctx))
+	}
 }
 
 func (e *Libeuicc) cleanupHttp() {

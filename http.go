@@ -271,7 +271,7 @@ func libeuiccHttpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_
 	}
 
 	c := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 60 * time.Second,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				RootCAs: rootCAs,
@@ -280,15 +280,14 @@ func libeuiccHttpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_
 	}
 
 	resp, err := c.Do(r)
-	reqBody, _ := io.ReadAll(r.Body)
-	body, _ := io.ReadAll(resp.Body)
-	defer r.Body.Close()
-	defer resp.Body.Close()
 	if err != nil {
-		logger.Error("Failed to send http request", err, "url", r.URL.String(), "request", string(reqBody), "status", resp.StatusCode, "response", string(body))
+		logger.Error("Failed to send http request", err, "url", r.URL.String())
 		return CError
 	}
-	logger.Debug("Http transmit success", "url", r.URL.String(), "request", string(reqBody), "status", resp.StatusCode, "response", string(body))
+
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	logger.Debug("Http transmit success", "url", r.URL.String(), "status", resp.StatusCode)
 
 	*rx = (*C.uint8_t)(C.CBytes(body))
 	*rx_len = C.uint32_t(len(body))
