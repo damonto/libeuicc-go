@@ -12,7 +12,7 @@ import (
 )
 
 type Libeuicc struct {
-	euiccCtx *C.struct_euicc_ctx
+	ctx *C.struct_euicc_ctx
 }
 
 var (
@@ -20,7 +20,7 @@ var (
 	ErrNotEnoughMemory = errors.New("not enough memory")
 )
 
-func NewLibeuicc(apdu APDU, customLogger Logger) (*Libeuicc, error) {
+func NewEuicc(driver APDU, customLogger Logger) (*Libeuicc, error) {
 	if customLogger != nil {
 		logger = customLogger
 	}
@@ -31,12 +31,12 @@ func NewLibeuicc(apdu APDU, customLogger Logger) (*Libeuicc, error) {
 	}
 
 	libeuicc := &Libeuicc{
-		euiccCtx: euiccCtx,
+		ctx: euiccCtx,
 	}
-	libeuicc.initAPDU(apdu)
+	libeuicc.initAPDU(driver)
 	libeuicc.initHttp()
 
-	if C.euicc_init(libeuicc.euiccCtx) == CError {
+	if C.euicc_init(libeuicc.ctx) == CError {
 		return nil, ErrEuiccInitFailed
 	}
 	return libeuicc, nil
@@ -44,16 +44,16 @@ func NewLibeuicc(apdu APDU, customLogger Logger) (*Libeuicc, error) {
 
 func (e *Libeuicc) Free() {
 	e.cleanupHttp()
-	C.euicc_fini(e.euiccCtx)
-	if e.euiccCtx.http._interface != nil {
-		C.free(unsafe.Pointer(e.euiccCtx.http._interface))
+	C.euicc_fini(e.ctx)
+	if e.ctx.http._interface != nil {
+		C.free(unsafe.Pointer(e.ctx.http._interface))
 	}
-	if e.euiccCtx.apdu._interface != nil {
-		C.free(unsafe.Pointer(e.euiccCtx.apdu._interface))
+	if e.ctx.apdu._interface != nil {
+		C.free(unsafe.Pointer(e.ctx.apdu._interface))
 	}
-	C.free(unsafe.Pointer(e.euiccCtx))
+	C.free(unsafe.Pointer(e.ctx))
 }
 
 func (e *Libeuicc) cleanupHttp() {
-	C.euicc_http_cleanup(e.euiccCtx)
+	C.euicc_http_cleanup(e.ctx)
 }

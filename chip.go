@@ -33,7 +33,7 @@ type ExtCardResource struct {
 
 func (e *Libeuicc) GetEid() (string, error) {
 	var eid *C.char
-	if C.es10c_get_eid(e.euiccCtx, &eid) == CError {
+	if C.es10c_get_eid(e.ctx, &eid) == CError {
 		return "", errors.New("es10c_get_eid failed")
 	}
 	defer C.free(unsafe.Pointer(eid))
@@ -42,7 +42,7 @@ func (e *Libeuicc) GetEid() (string, error) {
 
 func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
 	var euiccInfo2 C.struct_es10c_ex_euiccinfo2
-	if C.es10c_ex_get_euiccinfo2(e.euiccCtx, &euiccInfo2) == CError {
+	if C.es10c_ex_get_euiccinfo2(e.ctx, &euiccInfo2) == CError {
 		return nil, errors.New("es10c_ex_get_euiccinfo2 failed")
 	}
 	defer C.es10c_ex_euiccinfo2_free(&euiccInfo2)
@@ -60,7 +60,7 @@ func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
 
 func (e *Libeuicc) GetConfiguredAddresses() (*ConfiguredAddresses, error) {
 	var configuredAddresses C.struct_es10a_euicc_configured_addresses
-	if C.es10a_get_euicc_configured_addresses(e.euiccCtx, &configuredAddresses) == CError {
+	if C.es10a_get_euicc_configured_addresses(e.ctx, &configuredAddresses) == CError {
 		return nil, errors.New("es10a_get_euicc_configured_addresses failed")
 	}
 	defer C.es10a_euicc_configured_addresses_free(&configuredAddresses)
@@ -71,7 +71,7 @@ func (e *Libeuicc) GetConfiguredAddresses() (*ConfiguredAddresses, error) {
 }
 
 func (e *Libeuicc) Reset() error {
-	if C.es10c_euicc_memory_reset(e.euiccCtx) == CError {
+	if C.es10c_euicc_memory_reset(e.ctx) == CError {
 		return errors.New("es10c_euicc_memory_reset failed")
 	}
 	return nil
@@ -80,7 +80,7 @@ func (e *Libeuicc) Reset() error {
 func (e *Libeuicc) SetDefaultSMDPAddress(address string) error {
 	cAddress := C.CString(address)
 	defer C.free(unsafe.Pointer(cAddress))
-	if C.es10a_set_default_dp_address(e.euiccCtx, cAddress) == CError {
+	if C.es10a_set_default_dp_address(e.ctx, cAddress) == CError {
 		return errors.New("es10c_set_default_smdp_address failed")
 	}
 	return nil

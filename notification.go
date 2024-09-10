@@ -19,7 +19,7 @@ type Notification struct {
 
 func (e *Libeuicc) GetNotifications() ([]*Notification, error) {
 	var cNotifications *C.struct_es10b_notification_metadata_list
-	if C.es10b_list_notification(e.euiccCtx, &cNotifications) == CError {
+	if C.es10b_list_notification(e.ctx, &cNotifications) == CError {
 		return nil, errors.New("es10b_list_notification failed")
 	}
 	defer C.es10b_notification_metadata_list_free_all(cNotifications)
@@ -38,16 +38,16 @@ func (e *Libeuicc) GetNotifications() ([]*Notification, error) {
 func (e *Libeuicc) ProcessNotification(seqNumber int, remove bool) error {
 	defer e.cleanupHttp()
 	var notification C.struct_es10b_pending_notification
-	if C.es10b_retrieve_notifications_list(e.euiccCtx, &notification, C.ulong(seqNumber)) == CError {
+	if C.es10b_retrieve_notifications_list(e.ctx, &notification, C.ulong(seqNumber)) == CError {
 		return errors.New("es10b_retrieve_notifications_list failed")
 	}
-	e.euiccCtx.http.server_address = notification.notificationAddress
-	if C.es9p_handle_notification(e.euiccCtx, notification.b64_PendingNotification) == CError {
+	e.ctx.http.server_address = notification.notificationAddress
+	if C.es9p_handle_notification(e.ctx, notification.b64_PendingNotification) == CError {
 		return errors.New("es9p_handle_notification failed")
 	}
 	defer C.es10b_pending_notification_free(&notification)
 	if remove {
-		if C.es10b_remove_notification_from_list(e.euiccCtx, C.ulong(seqNumber)) == CError {
+		if C.es10b_remove_notification_from_list(e.ctx, C.ulong(seqNumber)) == CError {
 			return errors.New("es10b_remove_notification failed")
 		}
 	}
@@ -55,7 +55,7 @@ func (e *Libeuicc) ProcessNotification(seqNumber int, remove bool) error {
 }
 
 func (e *Libeuicc) DeleteNotification(seqNumber int) error {
-	if C.es10b_remove_notification_from_list(e.euiccCtx, C.ulong(seqNumber)) == CError {
+	if C.es10b_remove_notification_from_list(e.ctx, C.ulong(seqNumber)) == CError {
 		return errors.New("es10b_remove_notification failed")
 	}
 	return nil

@@ -62,25 +62,25 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 
 	logger.Debug("Downloading profile", "smdp", activationCode.SMDP, "matchingId", activationCode.MatchingId, "imei", activationCode.IMEI, "confirmationCode", activationCode.ConfirmationCode)
 
-	e.euiccCtx.http.server_address = cSmdp
+	e.ctx.http.server_address = cSmdp
 
 	e.handleProgress(downloadOption, DownloadProgressGetChallenge)
-	if (C.es10b_get_euicc_challenge_and_info(e.euiccCtx)) == CError {
+	if (C.es10b_get_euicc_challenge_and_info(e.ctx)) == CError {
 		return errors.New("es10b_get_euicc_challenge_and_info failed")
 	}
 
 	e.handleProgress(downloadOption, DownloadProgressInitiateAuthentication)
-	if C.es9p_initiate_authentication(e.euiccCtx) == CError {
+	if C.es9p_initiate_authentication(e.ctx) == CError {
 		return errors.New("es9p_initiate_authentication failed")
 	}
 
 	e.handleProgress(downloadOption, DownloadProgressAuthenticateServer)
-	if C.es10b_authenticate_server(e.euiccCtx, cMatchingId, cImei) == CError {
+	if C.es10b_authenticate_server(e.ctx, cMatchingId, cImei) == CError {
 		return errors.New("es10b_authenticate_server failed")
 	}
 
 	e.handleProgress(downloadOption, DownloadProgressAuthenticateClient)
-	if C.es9p_authenticate_client(e.euiccCtx) != COK {
+	if C.es9p_authenticate_client(e.ctx) != COK {
 		return e.wrapES9PError()
 	}
 
@@ -126,7 +126,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		return e.cancelSession()
 	}
 	e.handleProgress(downloadOption, DownloadProgressConfirmDownload)
-	if C.es10b_prepare_download(e.euiccCtx, cConfirmationCode) == CError {
+	if C.es10b_prepare_download(e.ctx, cConfirmationCode) == CError {
 		return errors.New("es10b_prepare_download failed")
 	}
 
@@ -134,7 +134,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		return e.cancelSession()
 	}
 	e.handleProgress(downloadOption, DownloadProgressGetBoundProfile)
-	if C.es9p_get_bound_profile_package(e.euiccCtx) == CError {
+	if C.es9p_get_bound_profile_package(e.ctx) == CError {
 		return errors.New("es9p_get_bound_profile_package failed")
 	}
 
@@ -150,7 +150,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	}
 	defer C.free(unsafe.Pointer(downloadResult))
 	e.handleProgress(downloadOption, DownloadProgressLoadBoundProfile)
-	if C.es10b_load_bound_profile_package(e.euiccCtx, downloadResult) != COK {
+	if C.es10b_load_bound_profile_package(e.ctx, downloadResult) != COK {
 		if err := e.cancelSession(); err != nil {
 			return errors.Join(e.wrapLoadBPPError(downloadResult), err)
 		}
@@ -177,10 +177,10 @@ func (e *Libeuicc) wrapLoadBPPError(downloadResult *C.struct_es10b_load_bound_pr
 
 func (e *Libeuicc) wrapES9PError() error {
 	return fmt.Errorf("subjectIdentifier: %s subjectCode: %s reasonCode: %s message: %s",
-		C.GoString(&e.euiccCtx.http.status.subjectIdentifier[0]),
-		C.GoString(&e.euiccCtx.http.status.subjectCode[0]),
-		C.GoString(&e.euiccCtx.http.status.reasonCode[0]),
-		C.GoString(&e.euiccCtx.http.status.message[0]),
+		C.GoString(&e.ctx.http.status.subjectIdentifier[0]),
+		C.GoString(&e.ctx.http.status.subjectCode[0]),
+		C.GoString(&e.ctx.http.status.reasonCode[0]),
+		C.GoString(&e.ctx.http.status.message[0]),
 	)
 }
 
@@ -194,17 +194,17 @@ func (e *Libeuicc) isCanceled(ctx context.Context) bool {
 }
 
 func (e *Libeuicc) cancelSession() error {
-	if C.es10b_cancel_session(e.euiccCtx, C.ES10B_CANCEL_SESSION_REASON_ENDUSERREJECTION) == CError {
+	if C.es10b_cancel_session(e.ctx, C.ES10B_CANCEL_SESSION_REASON_ENDUSERREJECTION) == CError {
 		return errors.New("es10b_cancel_session failed")
 	}
-	if C.es9p_cancel_session(e.euiccCtx) == CError {
+	if C.es9p_cancel_session(e.ctx) == CError {
 		return errors.New("es9p_cancel_session failed")
 	}
 	return nil
 }
 
 func (e *Libeuicc) isConfirmationCodeRequired() (bool, error) {
-	base64decodedSmdpSigned2, err := base64.StdEncoding.DecodeString(C.GoString(e.euiccCtx.http._internal.prepare_download_param.b64_smdpSigned2))
+	base64decodedSmdpSigned2, err := base64.StdEncoding.DecodeString(C.GoString(e.ctx.http._internal.prepare_download_param.b64_smdpSigned2))
 	if err != nil {
 		return false, err
 	}
@@ -233,7 +233,7 @@ func (e *Libeuicc) isConfirmationCodeRequired() (bool, error) {
 
 func (e *Libeuicc) parseProfileMetadata() (*ProfileMetadata, error) {
 	var cProfileMetadata *C.struct_es8p_metadata
-	if C.es8p_metadata_parse(&cProfileMetadata, e.euiccCtx.http._internal.prepare_download_param.b64_profileMetadata) == CError {
+	if C.es8p_metadata_parse(&cProfileMetadata, e.ctx.http._internal.prepare_download_param.b64_profileMetadata) == CError {
 		return nil, errors.New("es8p_parse_metadata failed")
 	}
 	defer C.es8p_metadata_free(&cProfileMetadata)

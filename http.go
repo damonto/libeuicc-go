@@ -249,7 +249,7 @@ ikThXjhpLtSrSKN2AiAxHxgC87L0FDnH8dJNlkdGX9c0JIx6oLheIplfS6k+jg==
 }
 
 func (e *Libeuicc) initHttp() {
-	e.euiccCtx.http._interface = C.init_http_interface()
+	e.ctx.http._interface = C.init_http_interface()
 }
 
 //export libeuiccHttpTransmit

@@ -47,10 +47,10 @@ type APDUContext struct {
 }
 
 func (e *Libeuicc) initAPDU(driver APDU) {
-	e.euiccCtx.userdata = unsafe.Pointer(&APDUContext{
+	e.ctx.userdata = unsafe.Pointer(&APDUContext{
 		driver: driver,
 	})
-	e.euiccCtx.apdu._interface = C.init_apdu_interface()
+	e.ctx.apdu._interface = C.init_apdu_interface()
 }
 
 //export libeuiccApduConnect
