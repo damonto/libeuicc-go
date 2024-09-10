@@ -50,8 +50,8 @@ func (q *qmi) Transmit(command []byte) ([]byte, error) {
 	if C.libeuicc_qmi_apdu_transmit(&cResponse, &cResponseLen, (*C.uchar)(cCommand), C.uint(len(command))) == -1 {
 		return nil, errors.New("failed to transmit APDU")
 	}
+	defer C.free(unsafe.Pointer(cResponse))
 	response := C.GoBytes(unsafe.Pointer(cResponse), C.int(cResponseLen))
-	C.free(unsafe.Pointer(cResponse))
 	return response, nil
 }
 
