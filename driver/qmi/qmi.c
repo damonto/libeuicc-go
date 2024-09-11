@@ -372,6 +372,7 @@ int libeuicc_qmi_apdu_close_logical_channel(struct qmi_data *qmi_priv, uint8_t c
     }
 
     g_debug("Closed logical channel with id %d", channel);
-
     qmi_message_uim_logical_channel_output_unref(output);
+
+    return 0;
 }
