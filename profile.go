@@ -13,8 +13,8 @@ import (
 )
 
 type Profile struct {
-	ICCID        string          `json:"iccid"`
-	ISDPAid      string          `json:"isdpAid"`
+	Iccid        string          `json:"iccid"`
+	IsdpAid      string          `json:"isdpAid"`
 	State        ProfileState    `json:"profileState"`
 	Nickname     string          `json:"profileNickname"`
 	ProviderName string          `json:"serviceProviderName"`
@@ -26,15 +26,15 @@ type Profile struct {
 
 func (e *Libeuicc) GetProfiles() ([]*Profile, error) {
 	var cProfiles *C.struct_es10c_profile_info_list
-	if C.es10c_get_profiles_info(e.ctx, &cProfiles) == CError {
+	if C.es10c_get_profiles_info(e.euiccCtx, &cProfiles) == CError {
 		return nil, errors.New("es10c_get_profiles_info failed")
 	}
 	defer C.es10c_profile_info_list_free_all(cProfiles)
 	profiles := make([]*Profile, 0)
 	for cProfile := cProfiles; cProfile != nil; cProfile = cProfile.next {
 		profiles = append(profiles, &Profile{
-			ICCID:        C.GoString(&cProfile.iccid[0]),
-			ISDPAid:      C.GoString(&cProfile.isdpAid[0]),
+			Iccid:        C.GoString(&cProfile.iccid[0]),
+			IsdpAid:      C.GoString(&cProfile.isdpAid[0]),
 			State:        ProfileState(C.GoString(C.euicc_profilestate2str(cProfile.profileState))),
 			Nickname:     C.GoString(cProfile.profileNickname),
 			ProviderName: C.GoString(cProfile.serviceProviderName),
@@ -47,22 +47,30 @@ func (e *Libeuicc) GetProfiles() ([]*Profile, error) {
 	return profiles, nil
 }
 
-func (e *Libeuicc) EnableProfile(iccid string, refreshFlag int) error {
+func (e *Libeuicc) EnableProfile(iccid string, refresh bool) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
-	return e.wrapProfileOperationError(C.es10c_enable_profile(e.ctx, cIccid, C.uint8_t(refreshFlag)))
+	refreshFlag := C.uint8_t(0)
+	if refresh {
+		refreshFlag = C.uint8_t(1)
+	}
+	return e.wrapProfileOperationError(C.es10c_enable_profile(e.euiccCtx, cIccid, refreshFlag))
 }
 
-func (e *Libeuicc) DisableProfile(iccid string, refreshFlag int) error {
+func (e *Libeuicc) DisableProfile(iccid string, refresh bool) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
-	return e.wrapProfileOperationError(C.es10c_disable_profile(e.ctx, cIccid, C.uint8_t(refreshFlag)))
+	refreshFlag := C.uint8_t(0)
+	if refresh {
+		refreshFlag = C.uint8_t(1)
+	}
+	return e.wrapProfileOperationError(C.es10c_disable_profile(e.euiccCtx, cIccid, refreshFlag))
 }
 
 func (e *Libeuicc) DeleteProfile(iccid string) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
-	return e.wrapProfileOperationError(C.es10c_delete_profile(e.ctx, cIccid))
+	return e.wrapProfileOperationError(C.es10c_delete_profile(e.euiccCtx, cIccid))
 }
 
 func (e *Libeuicc) wrapProfileOperationError(err C.int) error {
@@ -91,7 +99,7 @@ func (e *Libeuicc) SetNickname(iccid, nickname string) error {
 	}
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
-	if C.es10c_set_nickname(e.ctx, cIccid, C.CString(nickname)) == CError {
+	if C.es10c_set_nickname(e.euiccCtx, cIccid, C.CString(nickname)) == CError {
 		return errors.New("es10c_set_profile_nickname failed")
 	}
 	return nil

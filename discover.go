@@ -50,19 +50,19 @@ func (e *Libeuicc) discover(smds string, imei string) ([]*RspServerAddress, erro
 	defer C.free(unsafe.Pointer(cSmds))
 	defer C.free(unsafe.Pointer(cImei))
 
-	e.ctx.http.server_address = cSmds
-	if C.es10b_get_euicc_challenge_and_info(e.ctx) == CError {
+	e.euiccCtx.http.server_address = cSmds
+	if C.es10b_get_euicc_challenge_and_info(e.euiccCtx) == CError {
 		return nil, errors.New("es10b_get_euicc_challenge_and_info failed")
 	}
-	if C.es9p_initiate_authentication(e.ctx) == CError {
+	if C.es9p_initiate_authentication(e.euiccCtx) == CError {
 		return nil, errors.New("es9p_initiate_authentication failed")
 	}
-	if C.es10b_authenticate_server(e.ctx, cImei, nil) == CError {
+	if C.es10b_authenticate_server(e.euiccCtx, cImei, nil) == CError {
 		return nil, errors.New("es10b_authenticate_server failed")
 	}
 
 	var cSmdpAdresses **C.char
-	if C.es11_authenticate_client(e.ctx, &cSmdpAdresses) == CError {
+	if C.es11_authenticate_client(e.euiccCtx, &cSmdpAdresses) == CError {
 		return nil, errors.New("es11_authenticate_client failed")
 	}
 	defer C.es11_smdp_list_free_all(cSmdpAdresses)

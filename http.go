@@ -248,12 +248,12 @@ ikThXjhpLtSrSKN2AiAxHxgC87L0FDnH8dJNlkdGX9c0JIx6oLheIplfS6k+jg==
 }
 
 func (e *Libeuicc) initHttp() error {
-	e.ctx.http._interface = (*C.struct_euicc_http_interface)(C.malloc(C.sizeof_struct_euicc_http_interface))
-	if e.ctx.http._interface == nil {
+	e.euiccCtx.http._interface = (*C.struct_euicc_http_interface)(C.malloc(C.sizeof_struct_euicc_http_interface))
+	if e.euiccCtx.http._interface == nil {
 		return errors.New("failed to allocate memory for http interface")
 	}
-	C.memset(unsafe.Pointer(e.ctx.http._interface), 0, C.sizeof_struct_euicc_http_interface)
-	C.libeuicc_init_http_interface(e.ctx.http._interface)
+	C.memset(unsafe.Pointer(e.euiccCtx.http._interface), 0, C.sizeof_struct_euicc_http_interface)
+	C.libeuicc_init_http_interface(e.euiccCtx.http._interface)
 	return nil
 }
 

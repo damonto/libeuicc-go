@@ -13,7 +13,12 @@ import (
 )
 
 type Libeuicc struct {
-	ctx *C.struct_euicc_ctx
+	euiccCtx   *C.struct_euicc_ctx
+	ApduDriver *ApduDriver
+}
+
+type ApduDriver struct {
+	driver APDU
 }
 
 var (
@@ -33,10 +38,13 @@ func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 	C.memset(unsafe.Pointer(euiccCtx), 0, C.sizeof_struct_euicc_ctx)
 
 	libeuicc := &Libeuicc{
-		ctx: euiccCtx,
+		euiccCtx: euiccCtx,
+		ApduDriver: &ApduDriver{
+			driver: driver,
+		},
 	}
 
-	if err := libeuicc.initAPDU(driver); err != nil {
+	if err := libeuicc.initAPDU(); err != nil {
 		libeuicc.Close()
 		return nil, err
 	}
@@ -45,36 +53,30 @@ func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 		return nil, err
 	}
 
-	if C.euicc_init(libeuicc.ctx) == CError {
+	if C.euicc_init(libeuicc.euiccCtx) == CError {
 		return nil, ErrEuiccInitFailed
 	}
 	return libeuicc, nil
 }
 
 func (e *Libeuicc) Close() {
-	if e.ctx != nil {
-		C.euicc_fini(e.ctx)
+	if e.euiccCtx != nil {
+		C.euicc_fini(e.euiccCtx)
 		defer func() {
-			C.free(unsafe.Pointer(e.ctx))
-			e.ctx = nil
+			C.free(unsafe.Pointer(e.euiccCtx))
+			e.euiccCtx = nil
 		}()
 	}
-	if e.ctx.http._interface != nil {
-		if e.ctx.http._interface.userdata != nil {
-			e.ctx.http._interface.userdata = nil
-		}
-		C.free(unsafe.Pointer(e.ctx.http._interface))
-		e.ctx.http._interface = nil
+	if e.euiccCtx.http._interface != nil {
+		C.free(unsafe.Pointer(e.euiccCtx.http._interface))
+		e.euiccCtx.http._interface = nil
 	}
-	if e.ctx.apdu._interface != nil {
-		if e.ctx.apdu._interface.userdata != nil {
-			e.ctx.apdu._interface.userdata = nil
-		}
-		C.free(unsafe.Pointer(e.ctx.apdu._interface))
-		e.ctx.apdu._interface = nil
+	if e.euiccCtx.apdu._interface != nil {
+		C.free(unsafe.Pointer(e.euiccCtx.apdu._interface))
+		e.euiccCtx.apdu._interface = nil
 	}
 }
 
 func (e *Libeuicc) cleanupHttp() {
-	C.euicc_http_cleanup(e.ctx)
+	C.euicc_http_cleanup(e.euiccCtx)
 }
