@@ -2,6 +2,7 @@ package libeuicc
 
 /*
 #include <stdlib.h>
+#include <string.h>
 
 #include "es10a.h"
 #include "es10b.h"
@@ -148,6 +149,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 		}
 		return errors.New("failed to allocate memory for downloadResult")
 	}
+	C.memset(unsafe.Pointer(downloadResult), 0, C.sizeof_struct_es10b_load_bound_profile_package_result)
 	defer C.free(unsafe.Pointer(downloadResult))
 	e.handleProgress(downloadOption, DownloadProgressLoadBoundProfile)
 	if C.es10b_load_bound_profile_package(e.ctx, downloadResult) != COK {
@@ -215,6 +217,7 @@ func (e *Libeuicc) isConfirmationCodeRequired() (bool, error) {
 	if smdpSigned2 == nil {
 		return false, errors.New("failed to allocate memory for ccFlag")
 	}
+	C.memset(unsafe.Pointer(smdpSigned2), 0, C.sizeof_struct_euicc_derutil_node)
 	defer C.free(unsafe.Pointer(smdpSigned2))
 	if C.euicc_derutil_unpack_find_tag(smdpSigned2, 0x30, (*C.uchar)(unsafe.Pointer(cB64s)), C.uint(len(base64decodedSmdpSigned2))) == CError {
 		return false, errors.New("euicc_derutil_unpack_find_tag failed")
@@ -224,6 +227,7 @@ func (e *Libeuicc) isConfirmationCodeRequired() (bool, error) {
 	if ccFlag == nil {
 		return false, errors.New("failed to allocate memory for ccFlag")
 	}
+	C.memset(unsafe.Pointer(ccFlag), 0, C.sizeof_struct_euicc_derutil_node)
 	defer C.free(unsafe.Pointer(ccFlag))
 	if C.euicc_derutil_unpack_find_tag(ccFlag, 0x01, smdpSigned2.value, smdpSigned2.length) == CError {
 		return false, errors.New("euicc_derutil_unpack_find_tag failed")

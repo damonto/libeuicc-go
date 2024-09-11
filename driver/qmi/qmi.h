@@ -4,8 +4,8 @@
 
 struct qmi_data
 {
-    int lastChannelId;
-    int uimSlot;
+    uint8_t lastChannelId;
+    uint8_t uimSlot;
     GMainContext *context;
     QmiClientUim *uimClient;
 };
@@ -52,8 +52,8 @@ qmi_client_uim_send_apdu_sync(
     GMainContext *context,
     GError **error);
 
-int libeuicc_qmi_apdu_connect(char *device_path, int uim_slot);
-void libeuicc_qmi_apdu_disconnect();
-int libeuicc_qmi_apdu_transmit(uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len);
-int libeuicc_qmi_apdu_open_logical_channel(const uint8_t *aid, uint8_t aid_len);
-int libeuicc_qmi_apdu_close_logical_channel(uint8_t channel);
+int libeuicc_qmi_apdu_connect(struct qmi_data *qmi_priv, char *device_path);
+void libeuicc_qmi_apdu_disconnect(struct qmi_data *qmi_priv);
+int libeuicc_qmi_apdu_transmit(struct qmi_data *qmi_priv, uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len);
+int libeuicc_qmi_apdu_open_logical_channel(struct qmi_data *qmi_priv, const uint8_t *aid, uint8_t aid_len);
+int libeuicc_qmi_apdu_close_logical_channel(struct qmi_data *qmi_priv, uint8_t channel);

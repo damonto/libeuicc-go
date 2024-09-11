@@ -3,23 +3,21 @@ package libeuicc
 /*
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "euicc.h"
 #include "interface.h"
 
 extern int libeuiccHttpTransmit(struct euicc_ctx *ctx, char *url, uint32_t *rcode, uint8_t **rx, uint32_t *rx_len, uint8_t *tx, uint32_t tx_len, char **headers);
 
-static int libeuicc_forward_http_transmit(struct euicc_ctx *ctx, const char *url, uint32_t *rcode, uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len, const char **headers) {
-	return libeuiccHttpTransmit(ctx, (char *)url, rcode, rx, rx_len, (uint8_t *)tx, tx_len, (char **)headers);
-};
-
-static struct euicc_http_interface *init_http_interface()
+static int libeuicc_forward_http_transmit(struct euicc_ctx *ctx, const char *url, uint32_t *rcode, uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len, const char **headers)
 {
-	struct euicc_http_interface *http = (struct euicc_http_interface *)malloc(sizeof(struct euicc_http_interface));
+	return libeuiccHttpTransmit(ctx, (char *)url, rcode, rx, rx_len, (uint8_t *)tx, tx_len, (char **)headers);
+}
 
-	http->transmit = libeuicc_forward_http_transmit;
-
-	return http;
+static void libeuicc_init_http_interface(struct euicc_http_interface *ifstruct)
+{
+	ifstruct->transmit = libeuicc_forward_http_transmit;
 }
 */
 import "C"
@@ -27,6 +25,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -248,8 +247,14 @@ ikThXjhpLtSrSKN2AiAxHxgC87L0FDnH8dJNlkdGX9c0JIx6oLheIplfS6k+jg==
 -----END CERTIFICATE-----`,
 }
 
-func (e *Libeuicc) initHttp() {
-	e.ctx.http._interface = C.init_http_interface()
+func (e *Libeuicc) initHttp() error {
+	e.ctx.http._interface = (*C.struct_euicc_http_interface)(C.malloc(C.sizeof_struct_euicc_http_interface))
+	if e.ctx.http._interface == nil {
+		return errors.New("failed to allocate memory for http interface")
+	}
+	C.memset(unsafe.Pointer(e.ctx.http._interface), 0, C.sizeof_struct_euicc_http_interface)
+	C.libeuicc_init_http_interface(e.ctx.http._interface)
+	return nil
 }
 
 //export libeuiccHttpTransmit
@@ -287,7 +292,7 @@ func libeuiccHttpTransmit(ctx *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_
 
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
-	logger.Debug("Http transmit success", "url", r.URL.String(), "status", resp.StatusCode)
+	logger.Debug("Http transmit success", "url", r.URL.String(), "status", resp.StatusCode, "body", string(body))
 
 	*rx = (*C.uint8_t)(C.CBytes(body))
 	*rx_len = C.uint32_t(len(body))

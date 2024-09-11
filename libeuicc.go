@@ -2,6 +2,7 @@ package libeuicc
 
 /*
 #include <stdlib.h>
+#include <string.h>
 
 #include "euicc.h"
 */
@@ -29,12 +30,20 @@ func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 	if euiccCtx == nil {
 		return nil, ErrNotEnoughMemory
 	}
+	C.memset(unsafe.Pointer(euiccCtx), 0, C.sizeof_struct_euicc_ctx)
 
 	libeuicc := &Libeuicc{
 		ctx: euiccCtx,
 	}
-	libeuicc.initAPDU(driver)
-	libeuicc.initHttp()
+
+	if err := libeuicc.initAPDU(driver); err != nil {
+		libeuicc.Close()
+		return nil, err
+	}
+	if err := libeuicc.initHttp(); err != nil {
+		libeuicc.Close()
+		return nil, err
+	}
 
 	if C.euicc_init(libeuicc.ctx) == CError {
 		return nil, ErrEuiccInitFailed
@@ -43,15 +52,26 @@ func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 }
 
 func (e *Libeuicc) Close() {
-	C.euicc_fini(e.ctx)
+	if e.ctx != nil {
+		C.euicc_fini(e.ctx)
+		defer func() {
+			C.free(unsafe.Pointer(e.ctx))
+			e.ctx = nil
+		}()
+	}
 	if e.ctx.http._interface != nil {
+		if e.ctx.http._interface.userdata != nil {
+			e.ctx.http._interface.userdata = nil
+		}
 		C.free(unsafe.Pointer(e.ctx.http._interface))
+		e.ctx.http._interface = nil
 	}
 	if e.ctx.apdu._interface != nil {
+		if e.ctx.apdu._interface.userdata != nil {
+			e.ctx.apdu._interface.userdata = nil
+		}
 		C.free(unsafe.Pointer(e.ctx.apdu._interface))
-	}
-	if e.ctx != nil {
-		C.free(unsafe.Pointer(e.ctx))
+		e.ctx.apdu._interface = nil
 	}
 }
 

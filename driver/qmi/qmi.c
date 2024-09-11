@@ -3,8 +3,6 @@
 
 #include "qmi.h"
 
-static struct qmi_data *qmi_priv;
-
 static void
 async_result_ready(GObject *source_object,
                    GAsyncResult *res,
@@ -187,21 +185,12 @@ qmi_client_uim_send_apdu_sync(
     return qmi_client_uim_send_apdu_finish(client, result, error);
 }
 
-int libeuicc_qmi_apdu_connect(char *device_path, int uim_slot)
+int libeuicc_qmi_apdu_connect(struct qmi_data *qmi_priv, char *device_path)
 {
     g_autoptr(GError) error = NULL;
     QmiDevice *device = NULL;
     QmiClient *client = NULL;
     GFile *file;
-
-    qmi_priv = malloc(sizeof(struct qmi_data));
-    if (!qmi_priv)
-    {
-        fprintf(stderr, "Failed allocating memory\n");
-        return -1;
-    }
-
-    qmi_priv->uimSlot = uim_slot;
 
     file = g_file_new_for_path(device_path);
 
@@ -232,7 +221,7 @@ int libeuicc_qmi_apdu_connect(char *device_path, int uim_slot)
     return 0;
 }
 
-void libeuicc_qmi_apdu_disconnect()
+void libeuicc_qmi_apdu_disconnect(struct qmi_data *qmi_priv)
 {
     g_autoptr(GError) error = NULL;
     QmiClient *client = QMI_CLIENT(qmi_priv->uimClient);
@@ -249,15 +238,15 @@ void libeuicc_qmi_apdu_disconnect()
 
     if (qmi_priv->lastChannelId > 0)
     {
-        libeuicc_qmi_apdu_close_logical_channel(qmi_priv->lastChannelId);
-        qmi_priv->lastChannelId = -1;
+        libeuicc_qmi_apdu_close_logical_channel(qmi_priv, qmi_priv->lastChannelId);
+        qmi_priv->lastChannelId = 0;
     }
 
-    free(qmi_priv);
-    qmi_priv = NULL;
+    qmi_priv->lastChannelId = 0;
+    qmi_priv->uimSlot = 0;
 }
 
-int libeuicc_qmi_apdu_transmit(uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len)
+int libeuicc_qmi_apdu_transmit(struct qmi_data *qmi_priv, uint8_t **rx, uint32_t *rx_len, const uint8_t *tx, uint32_t tx_len)
 {
     g_autoptr(GError) error = NULL;
     g_autoptr(GArray) apdu_data = NULL;
@@ -304,7 +293,7 @@ int libeuicc_qmi_apdu_transmit(uint8_t **rx, uint32_t *rx_len, const uint8_t *tx
     return 0;
 }
 
-int libeuicc_qmi_apdu_open_logical_channel(const uint8_t *aid, uint8_t aid_len)
+int libeuicc_qmi_apdu_open_logical_channel(struct qmi_data *qmi_priv, const uint8_t *aid, uint8_t aid_len)
 {
     g_autoptr(GError) error = NULL;
     guint8 channel_id;
@@ -350,7 +339,7 @@ int libeuicc_qmi_apdu_open_logical_channel(const uint8_t *aid, uint8_t aid_len)
     return channel_id;
 }
 
-int libeuicc_qmi_apdu_close_logical_channel(uint8_t channel)
+int libeuicc_qmi_apdu_close_logical_channel(struct qmi_data *qmi_priv, uint8_t channel)
 {
     g_autoptr(GError) error = NULL;
 
@@ -378,7 +367,9 @@ int libeuicc_qmi_apdu_close_logical_channel(uint8_t channel)
 
     /* Mark channel as having been cleaned up */
     if (channel == qmi_priv->lastChannelId)
-        qmi_priv->lastChannelId = -1;
+    {
+        qmi_priv->lastChannelId = 0;
+    }
 
     g_debug("Closed logical channel with id %d", channel);
 
