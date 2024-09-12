@@ -42,7 +42,7 @@ func (e *Libeuicc) GetEid() (string, error) {
 }
 
 // GetEuiccInfo2 returns the eUICC information.
-// It includes the SAS accreditation number, profile version, firmware version, card resource, and CI PK ID list for signing.
+// It includes the SAS accreditation number, profile version, firmware version, card resource, and CI PKI ID list for signing.
 func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
 	var euiccInfo2 C.struct_es10c_ex_euiccinfo2
 	if C.es10c_ex_get_euiccinfo2(e.euiccCtx, &euiccInfo2) == CError {
