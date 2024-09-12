@@ -13,15 +13,15 @@ import (
 )
 
 type Profile struct {
-	Iccid        string          `json:"iccid"`
-	IsdpAid      string          `json:"isdpAid"`
-	State        ProfileState    `json:"profileState"`
-	Nickname     string          `json:"profileNickname"`
-	ProviderName string          `json:"serviceProviderName"`
-	ProfileName  string          `json:"profileName"`
-	IconType     ProfileIconType `json:"iconType"`
-	Icon         string          `json:"icon"`
-	Class        ProfilceClass   `json:"profileClass"`
+	Iccid        string
+	IsdpAid      string
+	State        ProfileState
+	Nickname     string
+	ProviderName string
+	ProfileName  string
+	IconType     ProfileIconType
+	Icon         string
+	Class        ProfilceClass
 }
 
 // GetProfiles returns the installed profiles.

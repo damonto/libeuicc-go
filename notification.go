@@ -11,10 +11,10 @@ import (
 )
 
 type Notification struct {
-	SeqNumber                  int                                    `json:"seqNumber"`
-	ProfileManagementOperation NotificationProfileManagementOperation `json:"profileManagementOperation"`
-	NotificationAddress        string                                 `json:"notificationAddress"`
-	Iccid                      string                                 `json:"iccid"`
+	SeqNumber                  int
+	ProfileManagementOperation NotificationProfileManagementOperation
+	NotificationAddress        string
+	Iccid                      string
 }
 
 // GetNotifications returns the list of notifications.
