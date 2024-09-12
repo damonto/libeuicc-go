@@ -32,7 +32,7 @@ type ActivationCode struct {
 }
 
 type ProfileMetadata struct {
-	ICCID        string          `json:"iccid"`
+	Iccid        string          `json:"iccid"`
 	Nickname     string          `json:"profileNickname"`
 	ProviderName string          `json:"serviceProviderName"`
 	ProfileName  string          `json:"profileName"`
@@ -255,7 +255,7 @@ func (e *Libeuicc) parseProfileMetadata() (*ProfileMetadata, error) {
 	}
 	defer C.es8p_metadata_free(&cProfileMetadata)
 	return &ProfileMetadata{
-		ICCID:        C.GoString(&cProfileMetadata.iccid[0]),
+		Iccid:        C.GoString(&cProfileMetadata.iccid[0]),
 		ProviderName: C.GoString(cProfileMetadata.serviceProviderName),
 		ProfileName:  C.GoString(cProfileMetadata.profileName),
 		IconType:     ProfileIconType(C.GoString(C.euicc_icontype2str(cProfileMetadata.iconType))),

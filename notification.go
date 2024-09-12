@@ -14,7 +14,7 @@ type Notification struct {
 	SeqNumber                  int                                    `json:"seqNumber"`
 	ProfileManagementOperation NotificationProfileManagementOperation `json:"profileManagementOperation"`
 	NotificationAddress        string                                 `json:"notificationAddress"`
-	ICCID                      string                                 `json:"iccid"`
+	Iccid                      string                                 `json:"iccid"`
 }
 
 // GetNotifications returns the list of notifications.
@@ -30,7 +30,7 @@ func (e *Libeuicc) GetNotifications() ([]*Notification, error) {
 			SeqNumber:                  int(cNotification.seqNumber),
 			ProfileManagementOperation: NotificationProfileManagementOperation(C.GoString(C.euicc_profilemanagementoperation2str(cNotification.profileManagementOperation))),
 			NotificationAddress:        C.GoString(cNotification.notificationAddress),
-			ICCID:                      C.GoString(cNotification.iccid),
+			Iccid:                      C.GoString(cNotification.iccid),
 		})
 	}
 	return notifications, nil
