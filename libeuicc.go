@@ -27,7 +27,7 @@ var (
 )
 
 // New creates a new Libeuicc instance.
-func New(drv APDU, customLogger Logger) (*Libeuicc, error) {
+func New(apdu APDU, customLogger Logger) (*Libeuicc, error) {
 	if customLogger != nil {
 		logger = customLogger
 	}
@@ -41,7 +41,7 @@ func New(drv APDU, customLogger Logger) (*Libeuicc, error) {
 	libeuicc := &Libeuicc{
 		euiccCtx: euiccCtx,
 		driver: &driver{
-			apdu: drv,
+			apdu: apdu,
 		},
 	}
 

@@ -13,7 +13,8 @@ import (
 )
 
 type RspServerAddress struct {
-	RspServerAddress string `json:"rspServerAddress"`
+	// RspServerAddress is the provisioned RSP server address. You can use this address to download the eSIM profile.
+	RspServerAddress string
 }
 
 var defaultSmds = []string{
@@ -22,7 +23,7 @@ var defaultSmds = []string{
 }
 
 // Discover discovers the RSP server address.
-// If smds is empty, it will try to discover the RSP server address from the default SM-DS servers.
+// If SM-DS is empty, it will try to discover the RSP server address from the default SM-DS servers.
 func (e *Libeuicc) Discover(smds string, imei string) ([]*RspServerAddress, error) {
 	var discoveryResult []*RspServerAddress
 	if smds == "" {

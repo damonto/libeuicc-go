@@ -23,7 +23,7 @@ import (
 type ActivationCode struct {
 	// SMDP is the address of the SM-DP+ server.
 	SMDP string
-	// MatchingId is the matching ID.
+	// MatchingId is the matching ID. (Optional)
 	MatchingId string
 	// ConfirmationCode is the confirmation code. (Optional)
 	ConfirmationCode string
@@ -32,12 +32,12 @@ type ActivationCode struct {
 }
 
 type ProfileMetadata struct {
-	Iccid        string          `json:"iccid"`
-	Nickname     string          `json:"profileNickname"`
-	ProviderName string          `json:"serviceProviderName"`
-	ProfileName  string          `json:"profileName"`
-	IconType     ProfileIconType `json:"iconType"`
-	Icon         string          `json:"icon"`
+	Iccid        string
+	Nickname     string
+	ProviderName string
+	ProfileName  string
+	IconType     ProfileIconType
+	Icon         string
 }
 
 type DownloadOption struct {
