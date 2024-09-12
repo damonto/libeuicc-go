@@ -54,8 +54,6 @@ type DownloadOption struct {
 	ConfirmationCodeFunc func() string
 }
 
-type DownloadProgressHandler func(progress DownloadProgress)
-
 var (
 	ErrDownloadCanceled         = errors.New("download canceled")
 	ErrConfirmationCodeRequired = errors.New("confirmation code required")
