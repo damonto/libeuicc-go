@@ -31,6 +31,7 @@ type ExtCardResource struct {
 	FreeVolatileMemory    int `json:"freeVolatileMemory"`
 }
 
+// GetEid returns the EID of the eUICC.
 func (e *Libeuicc) GetEid() (string, error) {
 	var eid *C.char
 	if C.es10c_get_eid(e.euiccCtx, &eid) == CError {
@@ -40,6 +41,8 @@ func (e *Libeuicc) GetEid() (string, error) {
 	return C.GoString(eid), nil
 }
 
+// GetEuiccInfo2 returns the eUICC information.
+// It includes the SAS accreditation number, profile version, firmware version, card resource, and CI PK ID list for signing.
 func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
 	var euiccInfo2 C.struct_es10c_ex_euiccinfo2
 	if C.es10c_ex_get_euiccinfo2(e.euiccCtx, &euiccInfo2) == CError {
@@ -58,6 +61,8 @@ func (e *Libeuicc) GetEuiccInfo2() (*EuiccInfo2, error) {
 	}, nil
 }
 
+// GetConfiguredAddresses returns the configured addresses of the eUICC.
+// It includes the default SM-DP+ address and root SM-DS address.
 func (e *Libeuicc) GetConfiguredAddresses() (*ConfiguredAddresses, error) {
 	var configuredAddresses C.struct_es10a_euicc_configured_addresses
 	if C.es10a_get_euicc_configured_addresses(e.euiccCtx, &configuredAddresses) == CError {
@@ -70,6 +75,8 @@ func (e *Libeuicc) GetConfiguredAddresses() (*ConfiguredAddresses, error) {
 	}, nil
 }
 
+// Reset resets the eUICC memory.
+// Attention: This operation will erase all the data on the eUICC. (e.g. profiles, notifications, etc.)
 func (e *Libeuicc) Reset() error {
 	if C.es10c_euicc_memory_reset(e.euiccCtx) == CError {
 		return errors.New("es10c_euicc_memory_reset failed")
@@ -77,6 +84,7 @@ func (e *Libeuicc) Reset() error {
 	return nil
 }
 
+// SetDefaultSMDPAddress sets the default SM-DP+ address of the eUICC.
 func (e *Libeuicc) SetDefaultSMDPAddress(address string) error {
 	cAddress := C.CString(address)
 	defer C.free(unsafe.Pointer(cAddress))

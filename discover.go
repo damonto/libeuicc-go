@@ -21,6 +21,8 @@ var defaultSmds = []string{
 	"lpa.ds.gsma.com",
 }
 
+// Discover discovers the RSP server address.
+// If smds is empty, it will try to discover the RSP server address from the default SM-DS servers.
 func (e *Libeuicc) Discover(smds string, imei string) ([]*RspServerAddress, error) {
 	var discoveryResult []*RspServerAddress
 	if smds == "" {

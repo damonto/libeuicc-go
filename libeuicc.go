@@ -13,12 +13,12 @@ import (
 )
 
 type Libeuicc struct {
-	euiccCtx   *C.struct_euicc_ctx
-	ApduDriver *ApduDriver
+	euiccCtx *C.struct_euicc_ctx
+	driver   *driver
 }
 
-type ApduDriver struct {
-	driver APDU
+type driver struct {
+	apdu APDU
 }
 
 var (
@@ -26,7 +26,8 @@ var (
 	ErrNotEnoughMemory = errors.New("not enough memory")
 )
 
-func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
+// New creates a new Libeuicc instance.
+func New(drv APDU, customLogger Logger) (*Libeuicc, error) {
 	if customLogger != nil {
 		logger = customLogger
 	}
@@ -39,8 +40,8 @@ func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 
 	libeuicc := &Libeuicc{
 		euiccCtx: euiccCtx,
-		ApduDriver: &ApduDriver{
-			driver: driver,
+		driver: &driver{
+			apdu: drv,
 		},
 	}
 
@@ -59,6 +60,7 @@ func New(driver APDU, customLogger Logger) (*Libeuicc, error) {
 	return libeuicc, nil
 }
 
+// Close closes the Libeuicc instance. It must be called when the instance is no longer needed.
 func (e *Libeuicc) Close() {
 	if e.euiccCtx != nil {
 		C.euicc_fini(e.euiccCtx)

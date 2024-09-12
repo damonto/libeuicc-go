@@ -17,6 +17,7 @@ type Notification struct {
 	ICCID                      string                                 `json:"iccid"`
 }
 
+// GetNotifications returns the list of notifications.
 func (e *Libeuicc) GetNotifications() ([]*Notification, error) {
 	var cNotifications *C.struct_es10b_notification_metadata_list
 	if C.es10b_list_notification(e.euiccCtx, &cNotifications) == CError {
@@ -35,6 +36,8 @@ func (e *Libeuicc) GetNotifications() ([]*Notification, error) {
 	return notifications, nil
 }
 
+// ProcessNotification processes the notification with the given sequence number.
+// If remove is true, the notification will be removed from the eUICC.
 func (e *Libeuicc) ProcessNotification(seqNumber int, remove bool) error {
 	defer e.cleanupHttp()
 	var notification C.struct_es10b_pending_notification
@@ -54,6 +57,7 @@ func (e *Libeuicc) ProcessNotification(seqNumber int, remove bool) error {
 	return nil
 }
 
+// DeleteNotification deletes the notification with the given sequence number.
 func (e *Libeuicc) DeleteNotification(seqNumber int) error {
 	if C.es10b_remove_notification_from_list(e.euiccCtx, C.ulong(seqNumber)) == CError {
 		return errors.New("es10b_remove_notification failed")

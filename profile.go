@@ -24,6 +24,7 @@ type Profile struct {
 	Class        ProfilceClass   `json:"profileClass"`
 }
 
+// GetProfiles returns the installed profiles.
 func (e *Libeuicc) GetProfiles() ([]*Profile, error) {
 	var cProfiles *C.struct_es10c_profile_info_list
 	if C.es10c_get_profiles_info(e.euiccCtx, &cProfiles) == CError {
@@ -47,6 +48,9 @@ func (e *Libeuicc) GetProfiles() ([]*Profile, error) {
 	return profiles, nil
 }
 
+// EnableProfile enables the profile with the given ICCID.
+// It's recommended to send an enable notification via `ProcessNotification` to the SM-DP+ server.
+// Some eUICC chips may require a refresh flag. See [SGP.22 v2.2.2](https://www.gsma.com/solutions-and-impact/technologies/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#82) for more information.
 func (e *Libeuicc) EnableProfile(iccid string, refresh bool) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
@@ -57,6 +61,9 @@ func (e *Libeuicc) EnableProfile(iccid string, refresh bool) error {
 	return e.wrapProfileOperationError(C.es10c_enable_profile(e.euiccCtx, cIccid, refreshFlag))
 }
 
+// DisableProfile disables the profile with the given ICCID.
+// It's recommanded to send a disable notification via `ProcessNotification` to the SM-DP+ server.
+// Some eUICC chips may require a refresh flag. See [SGP.22 v2.2.2](https://www.gsma.com/solutions-and-impact/technologies/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#82) for more information.
 func (e *Libeuicc) DisableProfile(iccid string, refresh bool) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
@@ -67,6 +74,8 @@ func (e *Libeuicc) DisableProfile(iccid string, refresh bool) error {
 	return e.wrapProfileOperationError(C.es10c_disable_profile(e.euiccCtx, cIccid, refreshFlag))
 }
 
+// DeleteProfile deletes the profile with the given ICCID.
+// Once a profile is deleted, it cannot be recovered, and you must send the delete notification via `ProcessNotification` to the SM-DP+ server. otherwise, you may can't install it on another one of your devices.
 func (e *Libeuicc) DeleteProfile(iccid string) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
@@ -93,6 +102,7 @@ func (e *Libeuicc) wrapProfileOperationError(err C.int) error {
 	}
 }
 
+// SetNickname sets the nickname of the profile with the given ICCID. The nickname cannot be longer than 64 UTF-8 bytes.
 func (e *Libeuicc) SetNickname(iccid, nickname string) error {
 	if len(nickname) > 64 {
 		return errors.New("nickname is too long")

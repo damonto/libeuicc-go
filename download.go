@@ -21,10 +21,14 @@ import (
 )
 
 type ActivationCode struct {
-	SMDP             string
-	MatchingId       string
+	// SMDP is the address of the SM-DP+ server.
+	SMDP string
+	// MatchingId is the matching ID.
+	MatchingId string
+	// ConfirmationCode is the confirmation code. (Optional)
 	ConfirmationCode string
-	IMEI             string
+	// IMEI is the IMEI of the device. (Optional)
+	IMEI string
 }
 
 type ProfileMetadata struct {
@@ -37,8 +41,16 @@ type ProfileMetadata struct {
 }
 
 type DownloadOption struct {
-	ProgressBar          func(progress DownloadProgress)
-	ConfirmFunc          func(metadata *ProfileMetadata) bool
+	// ProgressBar is the callback function to handle the download progress.
+	ProgressBar func(progress DownloadProgress)
+
+	// ConfirmFunc is the callback function to confirm the download.
+	// If it is not set, the download will be confirmed automatically.
+	// If the function returns false, the download will be canceled.
+	ConfirmFunc func(metadata *ProfileMetadata) bool
+
+	// ConfirmationCodeFunc is the callback function to get the confirmation code.
+	// If you do not set it and a confirmation code is required, the download will be canceled.
 	ConfirmationCodeFunc func() string
 }
 
@@ -49,6 +61,7 @@ var (
 	ErrConfirmationCodeRequired = errors.New("confirmation code required")
 )
 
+// DownloadProfile downloads the eSIM profile from the SM-DP+ server.
 func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *ActivationCode, downloadOption *DownloadOption) error {
 	defer e.cleanupHttp()
 
