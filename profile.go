@@ -51,7 +51,7 @@ func (e *Libeuicc) GetProfiles() ([]*Profile, error) {
 // EnableProfile enables the profile with the given ICCID.
 // It's recommended to send an enable notification via `ProcessNotification` to the SM-DP+ server.
 // Some eUICC chips may require a refresh flag. See the GSMA SGP.22 v2.2.2 for more information.
-// SGP.22 v2.2.2: (https://www.gsma.com/solutions-and-impact/technologies/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#82
+// SGP.22 v2.2.2: https://www.gsma.com/solutions-and-impact/technologies/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#82
 func (e *Libeuicc) EnableProfile(iccid string, refresh bool) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
@@ -65,7 +65,7 @@ func (e *Libeuicc) EnableProfile(iccid string, refresh bool) error {
 // DisableProfile disables the profile with the given ICCID.
 // It's recommanded to send a disable notification via `ProcessNotification` to the SM-DP+ server.
 // Some eUICC chips may require a refresh flag. See the GSMA SGP.22 v2.2.2 for more information.
-// SGP.22 v2.2.2: (https://www.gsma.com/solutions-and-impact/technologies/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#82
+// SGP.22 v2.2.2: https://www.gsma.com/solutions-and-impact/technologies/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#82
 func (e *Libeuicc) DisableProfile(iccid string, refresh bool) error {
 	cIccid := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cIccid))
