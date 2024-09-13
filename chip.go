@@ -14,21 +14,21 @@ import (
 )
 
 type EuiccInfo2 struct {
-	SasAccreditationNumber string          `json:"sasAcreditationNumber"`
-	ProfileVersion         string          `json:"profileVersion"`
-	FirmwareVersion        string          `json:"firmwareVersion"`
-	ExtCardResource        ExtCardResource `json:"extCardResource"`
-	CiPKIdForSigning       []string        `json:"ciPKIdListForSigning"`
+	SasAccreditationNumber string
+	ProfileVersion         string
+	FirmwareVersion        string
+	ExtCardResource        ExtCardResource
+	CiPKIdForSigning       []string
 }
 
 type ConfiguredAddresses struct {
-	DefaultDPAddress string `json:"defaultDpAddress"`
-	RootDSAddress    string `json:"rootDsAddress"`
+	DefaultDPAddress string
+	RootDSAddress    string
 }
 
 type ExtCardResource struct {
-	FreeNonVolatileMemory int `json:"freeNonVolatileMemory"`
-	FreeVolatileMemory    int `json:"freeVolatileMemory"`
+	FreeNonVolatileMemory int
+	FreeVolatileMemory    int
 }
 
 // GetEid returns the EID of the eUICC.
