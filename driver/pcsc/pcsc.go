@@ -84,22 +84,21 @@ func (p *PCSCReader) Transmit(command []byte) ([]byte, error) {
 }
 
 func (p *PCSCReader) OpenLogicalChannel(aid []byte) (int, error) {
-	resp, err := p.Transmit([]byte{0x00, 0x70, 0x00, 0x00, 0x01})
+	channel, err := p.Transmit([]byte{0x00, 0x70, 0x00, 0x00, 0x01})
 	if err != nil {
 		return 0, err
 	}
-	if resp[1] != 0x90 {
+	if channel[1] != 0x90 {
 		return 0, errors.New("failed to open logical channel")
 	}
-
-	p.channel = resp[0]
+	p.channel = channel[0]
 	command := []byte{p.channel, 0xA4, 0x04, 0x00, byte(len(aid))}
 	command = append(command, aid...)
-	resp, err = p.Transmit(command)
+	resp, err := p.Transmit(command)
 	if err != nil {
 		return 0, err
 	}
-	if resp[0] != 0x90 && resp[0] != 0x61 {
+	if resp[len(resp)-2] != 0x90 && resp[len(resp)-2] != 0x61 {
 		return 0, errors.New("failed to select AID")
 	}
 	return int(p.channel), nil
