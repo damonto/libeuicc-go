@@ -24,7 +24,7 @@ func (e *Libeuicc) GetNotifications() ([]*Notification, error) {
 		return nil, errors.New("es10b_list_notification failed")
 	}
 	defer C.es10b_notification_metadata_list_free_all(cNotifications)
-	notifications := make([]*Notification, 0)
+	var notifications []*Notification
 	for cNotification := cNotifications; cNotification != nil; cNotification = cNotification.next {
 		notifications = append(notifications, &Notification{
 			SeqNumber:                  int(cNotification.seqNumber),

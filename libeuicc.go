@@ -12,6 +12,8 @@ import (
 	"unsafe"
 )
 
+const APDUMTU = 240
+
 type Libeuicc struct {
 	euiccCtx *C.struct_euicc_ctx
 	driver   *driver
@@ -31,20 +33,18 @@ func New(apdu APDU, customLogger Logger) (*Libeuicc, error) {
 	if customLogger != nil {
 		logger = customLogger
 	}
-
 	euiccCtx := (*C.struct_euicc_ctx)(C.malloc(C.sizeof_struct_euicc_ctx))
 	if euiccCtx == nil {
 		return nil, ErrNotEnoughMemory
 	}
 	C.memset(unsafe.Pointer(euiccCtx), 0, C.sizeof_struct_euicc_ctx)
-
+	euiccCtx.es10x_mss = APDUMTU
 	libeuicc := &Libeuicc{
 		euiccCtx: euiccCtx,
 		driver: &driver{
 			apdu: apdu,
 		},
 	}
-
 	if err := libeuicc.initAPDU(); err != nil {
 		libeuicc.Close()
 		return nil, err
@@ -53,7 +53,6 @@ func New(apdu APDU, customLogger Logger) (*Libeuicc, error) {
 		libeuicc.Close()
 		return nil, err
 	}
-
 	if C.euicc_init(libeuicc.euiccCtx) == CError {
 		return nil, ErrEuiccInitFailed
 	}

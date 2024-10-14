@@ -31,7 +31,7 @@ func (e *Libeuicc) GetProfiles() ([]*Profile, error) {
 		return nil, errors.New("es10c_get_profiles_info failed")
 	}
 	defer C.es10c_profile_info_list_free_all(cProfiles)
-	profiles := make([]*Profile, 0)
+	var profiles []*Profile
 	for cProfile := cProfiles; cProfile != nil; cProfile = cProfile.next {
 		profiles = append(profiles, &Profile{
 			Iccid:        C.GoString(&cProfile.iccid[0]),

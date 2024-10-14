@@ -70,7 +70,7 @@ func (e *Libeuicc) discover(smds string, imei string) ([]*RspServerAddress, erro
 	}
 	defer C.es11_smdp_list_free_all(cSmdpAdresses)
 
-	rspServerAddresses := make([]*RspServerAddress, 0)
+	var rspServerAddresses []*RspServerAddress
 	for _, smdpAddress := range GoStrings(cSmdpAdresses) {
 		rspServerAddresses = append(rspServerAddresses, &RspServerAddress{
 			RspServerAddress: smdpAddress,
