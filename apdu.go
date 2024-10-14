@@ -72,7 +72,7 @@ func libeuiccApduConnect(ctx *C.struct_euicc_ctx) C.int {
 		return CError
 	}
 	logger.Debug("APDU connect success")
-	return COK
+	return CSuccess
 }
 
 //export libeuiccApduDisconnect
@@ -115,5 +115,5 @@ func libeuiccApduTransmit(ctx *C.struct_euicc_ctx, rx **C.uint8_t, rx_len *C.uin
 	logger.Debug("APDU transmit success", "command", hex.EncodeToString(b), "response", hex.EncodeToString(r))
 	*rx = (*C.uint8_t)(C.CBytes(r))
 	*rx_len = C.uint32_t(len(r))
-	return COK
+	return CSuccess
 }

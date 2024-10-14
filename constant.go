@@ -39,6 +39,6 @@ const (
 	NotificationProfileManagementOperationInstall NotificationProfileManagementOperation = "install"
 	NotificationProfileManagementOperationDelete  NotificationProfileManagementOperation = "delete"
 
-	CError C.int = -1
-	COK    C.int = 0
+	CError   C.int = -1
+	CSuccess C.int = 0
 )

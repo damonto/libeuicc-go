@@ -102,5 +102,5 @@ func libeuiccHttpTransmit(_ *C.struct_euicc_ctx, url *C.char, rcode *C.uint32_t,
 	*rx = (*C.uint8_t)(C.CBytes(body))
 	*rx_len = C.uint32_t(len(body))
 	*rcode = C.uint32_t(resp.StatusCode)
-	return COK
+	return CSuccess
 }

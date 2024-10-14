@@ -88,7 +88,7 @@ func (e *Libeuicc) DeleteProfile(iccid string) error {
 }
 
 func (e *Libeuicc) wrapProfileOperationError(err C.int) error {
-	if err == COK {
+	if err == CSuccess {
 		return nil
 	}
 	switch err {

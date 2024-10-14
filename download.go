@@ -92,7 +92,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	}
 
 	e.handleProgress(downloadOption, DownloadProgressAuthenticateClient)
-	if C.es9p_authenticate_client(e.euiccCtx) != COK {
+	if C.es9p_authenticate_client(e.euiccCtx) != CSuccess {
 		return e.wrapES9PError()
 	}
 
@@ -163,7 +163,7 @@ func (e *Libeuicc) DownloadProfile(ctx context.Context, activationCode *Activati
 	C.memset(unsafe.Pointer(downloadResult), 0, C.sizeof_struct_es10b_load_bound_profile_package_result)
 	defer C.free(unsafe.Pointer(downloadResult))
 	e.handleProgress(downloadOption, DownloadProgressLoadBoundProfile)
-	if C.es10b_load_bound_profile_package(e.euiccCtx, downloadResult) != COK {
+	if C.es10b_load_bound_profile_package(e.euiccCtx, downloadResult) != CSuccess {
 		if err := e.cancelSession(); err != nil {
 			return errors.Join(e.wrapLoadBPPError(downloadResult), err)
 		}
