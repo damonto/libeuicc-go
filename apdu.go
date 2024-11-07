@@ -7,8 +7,6 @@ package libeuicc
 
 #include "interface.h"
 
-static struct qmi_data *qmi_priv;
-
 extern int libeuiccApduConnect(struct euicc_ctx *ctx);
 extern void libeuiccApduDisconnect(struct euicc_ctx *ctx);
 extern int libeuiccApduOpenLogicalChannel(struct euicc_ctx *ctx, uint8_t *aid, uint8_t aid_len);
