@@ -76,7 +76,7 @@ func (e *Libeuicc) GetConfiguredAddresses() (*ConfiguredAddresses, error) {
 }
 
 // Reset resets the eUICC memory.
-// Attention: This operation will erase all the data on the eUICC. (e.g. profiles, notifications, etc.)
+// Attention: This operation will erase all the data on the eUICC. 
 func (e *Libeuicc) Reset() error {
 	if C.es10c_euicc_memory_reset(e.euiccCtx) == CError {
 		return errors.New("es10c_euicc_memory_reset failed")
